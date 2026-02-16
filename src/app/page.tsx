@@ -19,9 +19,9 @@ const painPoints = [
     icon: "📐",
   },
   {
-    title: "Kan jeg bruge et andet garn?",
+    title: "Kan jeg bruge et billigere garn?",
     description:
-      "Opskriften kræver et garn du ikke har. Vores garn-erstatning viser, hvor mange nøgler af dit garn du skal bruge.",
+      "Opskriftens garn er dyrt. Vores værktøjer viser præcis hvor mange nøgler du skal bruge — også når dit masketal afviger.",
     icon: "🧵",
   },
 ];

@@ -3,6 +3,8 @@ import Link from "next/link";
 import GaugeCalculator from "@/components/tools/GaugeCalculator";
 import StitchWidthCalculator from "@/components/tools/StitchWidthCalculator";
 import YarnSubstitutionCalculator from "@/components/tools/YarnSubstitutionCalculator";
+import AdvancedYarnSubstitution from "@/components/tools/AdvancedYarnSubstitution";
+import YarnMatchChecker from "@/components/tools/YarnMatchChecker";
 import YarnUsageEstimator from "@/components/tools/YarnUsageEstimator";
 
 export const metadata: Metadata = {
@@ -25,8 +27,19 @@ const tools = [
   },
   {
     id: "yarn-substitution",
-    title: "Garn-erstatning beregner",
+    title: "Garn-erstatning (simpel)",
     description: "Bruger du et andet garn? Find ud af hvor mange nøgler du skal bruge.",
+  },
+  {
+    id: "yarn-advanced",
+    title: "Avanceret garn-erstatning",
+    description:
+      "Justering for strikkefasthed — undgå at købe for meget. Indtast masketal for præcis beregning.",
+  },
+  {
+    id: "yarn-match",
+    title: "Garn-sammenligning",
+    description: "Sammenlign to garn (masketal, tykkelse, pinde) — passer de sammen?",
   },
   {
     id: "yarn-usage",
@@ -49,7 +62,7 @@ export default function ToolsPage() {
           Strikke-værktøjer
         </h1>
         <p className="mt-2 text-charcoal-600">
-          Fire simple beregnere til almindelig strikke-matematik.
+          Beregnere til strikke-matematik, garn-erstatning og sammenligning.
         </p>
         <nav className="mt-6 flex flex-wrap gap-2" aria-label="Spring til værktøj">
           {tools.map((t) => (
@@ -78,6 +91,8 @@ export default function ToolsPage() {
             {tool.id === "gauge" && <GaugeCalculator />}
             {tool.id === "stitch-width" && <StitchWidthCalculator />}
             {tool.id === "yarn-substitution" && <YarnSubstitutionCalculator />}
+            {tool.id === "yarn-advanced" && <AdvancedYarnSubstitution />}
+            {tool.id === "yarn-match" && <YarnMatchChecker />}
             {tool.id === "yarn-usage" && <YarnUsageEstimator />}
           </section>
         ))}
