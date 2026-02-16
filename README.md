@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KnitWise
 
-## Getting Started
+A calm, simple knitting math assistant. Four tools for common pain points:
 
-First, run the development server:
+- **Gauge Adjustment Calculator** — Your gauge doesn't match the pattern? Get the correct stitch count.
+- **Stitch Width Calculator** — How wide will X stitches at Y gauge be?
+- **Yarn Substitution Calculator** — Using different yarn? Find how many skeins you need (with 10% safety margin).
+- **Yarn Usage Estimator** — Estimate meters for sweaters, cardigans, hats, etc. by size and yarn weight.
+
+## Stack
+
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+
+## Run
+
+**Vigtigt:** Kør fra projektmappen (den der indeholder `package.json`).
 
 ```bash
+cd vibecoding   # hvis du er i mappen over
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Åbn den URL som terminalen viser (typisk [http://localhost:3000](http://localhost:3000)). Hvis port 3000 er optaget, bruges 3001, 3002 osv. — tjek terminalen.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Får du 404?
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Tjek at du er i den rigtige mappe: `ls` skal vise `package.json` og `src/`
+2. Stop serveren (Ctrl+C) og kør: `rm -rf .next && npm run dev`
+3. Prøv både `/` og `/tools` — begge bør virke
 
-## Learn More
+## Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/
+│   ├── layout.tsx      # Root layout, metadata
+│   ├── page.tsx        # Landing page
+│   └── tools/
+│       └── page.tsx    # Tools page
+├── components/
+│   ├── ui/             # Input, Card, Select, ResultBox
+│   └── tools/          # 4 calculator components
+└── lib/
+    └── yarnData.ts     # Yarn usage estimates config
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Future ready
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Structure supports adding: user accounts, saved projects, PDF export, Stripe
