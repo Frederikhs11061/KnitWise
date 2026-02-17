@@ -125,7 +125,6 @@ export async function POST(request: NextRequest) {
     // 1. customer_email (hvis sat ved oprettelse)
     // 2. customer_details.email (hvis indsamlet i checkout-formularen)
     // 3. customer.email (hvis customer objektet er expanderet)
-    const sessionAny = session as any;
     const email = 
       session.customer_email || 
       sessionAny.customer_details?.email ||
@@ -167,7 +166,6 @@ export async function POST(request: NextRequest) {
       });
     } else {
       // Log alt hvad vi har fundet for debugging
-      const sessionAny = session as any;
       console.error("No email found on session - all checked locations:", {
         customer_email: session.customer_email,
         customer_details: sessionAny.customer_details,
