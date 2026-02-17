@@ -127,8 +127,9 @@ export async function POST(request: NextRequest) {
         quantity: item.quantity,
       })),
       mode: "payment",
-      success_url: `${request.headers.get("origin")}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${request.headers.get("origin")}/kurv`,
+      // Brug fast base URL så brugeren altid lander på dit hoveddomæne (fx stichofcare.vercel.app), ikke preview-URL
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || request.headers.get("origin") || "https://stichofcare.vercel.app"}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || request.headers.get("origin") || "https://stichofcare.vercel.app"}/kurv`,
       // Only set customer_email if provided (logged in user)
       // Otherwise Stripe will collect email in checkout form
       ...(userEmail && { customer_email: userEmail }),

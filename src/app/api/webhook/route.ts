@@ -16,6 +16,15 @@ async function getStripe() {
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
 
+/** GET: bare for at tjekke at URL'en kan nås fra Stripe */
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    message: "Webhook endpoint er nåbart. Stripe sender POST med checkout.session.completed.",
+    hasWebhookSecret: !!webhookSecret,
+  });
+}
+
 export async function POST(request: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json(
