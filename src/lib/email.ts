@@ -192,32 +192,21 @@ export async function sendPatternEmail(data: EmailData) {
       }
     });
 
-    let attachments: { filename: string; content: string }[] = [];
+    const attachments: { filename: string; content: Buffer }[] = [];
     try {
-      console.log("📄 Generating PDFs for patterns:", patternSlugs);
       const { generatePatternPDFs } = await import("./pdf");
       const pdfs = await generatePatternPDFs(patternSlugs);
-      console.log(`✅ Generated ${pdfs.length} PDFs successfully`);
-      attachments = pdfs.map((pdf) => ({
-        filename: pdf.filename,
-        content: pdf.buffer.toString("base64"),
-      }));
-      console.log(`📎 Attaching ${attachments.length} PDFs to email`);
+      for (const pdf of pdfs) {
+        attachments.push({ filename: pdf.filename, content: pdf.buffer });
+      }
+      if (attachments.length === 0 && patternSlugs.length > 0) {
+        console.error("No PDFs generated despite having pattern slugs:", patternSlugs);
+      }
     } catch (pdfError: any) {
-      console.error("❌ PDF generation failed, sending email without attachments:", pdfError?.message);
-      console.error("PDF error details:", pdfError);
-      // Send email anyway – kunden får besked og kan downloade PDF på success-siden
+      console.error("PDF generation failed:", pdfError?.message);
+      throw new Error(`Kunne ikke generere PDF til email: ${pdfError?.message || "ukendt fejl"}`);
     }
 
-    // Send email (with or without PDF attachments)
-    // Use Resend's test domain if custom domain not verified
-    // Change to "noreply@stitchofcare.dk" once domain is verified in Resend
-    console.log("📧 Attempting to send email via Resend:", {
-      to: data.email,
-      subject: `Tak for dit køb - Ordre ${data.orderNumber} | Stitch of Care`,
-      attachmentsCount: attachments.length,
-    });
-    
     const result = await resendClient.emails.send({
       from: "Stitch of Care <onboarding@resend.dev>", // Test domain - change to your domain when verified
       to: normalizedEmail, // Use normalized email (lowercase) for Resend compatibility
@@ -226,9 +215,6 @@ export async function sendPatternEmail(data: EmailData) {
       attachments: attachments,
     });
 
-    console.log(`✅ Email sent to ${normalizedEmail} for order ${data.orderNumber} with ${attachments.length} PDF attachments`);
-    console.log("📧 Resend response:", JSON.stringify(result, null, 2));
-    
     // Check if Resend returned an error
     if (result.error) {
       console.error("❌ Resend returned error:", result.error);

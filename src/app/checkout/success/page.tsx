@@ -10,9 +10,8 @@ function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
-  const [emailError, setEmailError] = useState<any>(null);
-  const [emailResponse, setEmailResponse] = useState<any>(null);
+  const [sessionData, setSessionData] = useState<{ metadata?: { patternSlugs?: string }; payment_status?: string } | null>(null);
+  const [emailResponse, setEmailResponse] = useState<{ resendTestLimit?: boolean } | null>(null);
   const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
@@ -23,11 +22,10 @@ function CheckoutSuccessContent() {
       const checkSession = async () => {
         try {
           const res = await fetch(`/api/check-session?session_id=${sessionId}`);
-          const sessionData = await res.json();
-          setDebugInfo(sessionData);
-          console.log("📋 Session data:", sessionData);
-        } catch (error) {
-          console.error("Error checking session:", error);
+          const data = await res.json();
+          setSessionData(data);
+        } catch {
+          // Ignorer
         }
       };
       checkSession();
@@ -36,7 +34,6 @@ function CheckoutSuccessContent() {
       // Vent lidt først - Stripe session kan være lidt langsom med at opdatere payment_status
       const sendEmail = async (retryCount = 0) => {
         try {
-          console.log("📧 Calling /api/send-order-email with sessionId:", sessionId);
           const res = await fetch("/api/send-order-email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -44,31 +41,18 @@ function CheckoutSuccessContent() {
           });
           
           const data = await res.json();
-          setEmailResponse(data); // Gem altid responsen så vi kan se den
-          console.log("📧 Email API response:", data);
-          
-          if (data.success) {
-            console.log("✅ Order email sent:", data);
-          } else if (data.alreadySent) {
-            console.log("ℹ️ Email already sent previously");
-          } else if (data.error === "Betaling ikke gennemført" && retryCount < 3) {
-            // Retry hvis betaling ikke er klar endnu
-            console.log(`⏳ Payment not ready yet, retrying... (${retryCount + 1}/3)`);
-            setTimeout(() => sendEmail(retryCount + 1), 2000); // Vent 2 sekunder før retry
+          setEmailResponse(data);
+
+          if (data.success || data.alreadySent) return;
+          if (data.error === "Betaling ikke gennemført" && retryCount < 3) {
+            setTimeout(() => sendEmail(retryCount + 1), 2000);
             return;
           } else if (data.resendTestLimit) {
-            // Resend tillader kun test-mails til ejerens email – vis venlig besked, ingen alert
-            console.warn("ℹ️ Resend test limit – email ikke sendt til kunde");
             setEmailResponse(data);
-            setEmailError(null); // Ingen “fejl” fra kundens synspunkt
           } else {
-            console.error("❌ Failed to send order email:", data);
-            setEmailError(data);
-            alert(`Kunne ikke sende email automatisk. Fejl: ${data.error || "Ukendt fejl"}\n\nTjek browser console (F12) for detaljer.`);
+            alert(`Kunne ikke sende email automatisk. Fejl: ${data.error || "Ukendt fejl"}`);
           }
-        } catch (error) {
-          console.error("❌ Error calling send-order-email:", error);
-          setEmailError({ error: "Network error", details: error });
+        } catch {
           if (retryCount < 2) {
             setTimeout(() => sendEmail(retryCount + 1), 2000);
           } else {
@@ -85,9 +69,9 @@ function CheckoutSuccessContent() {
   }, [sessionId, router]);
 
   const orderPatterns = useMemo(() => {
-    if (!debugInfo?.metadata?.patternSlugs || debugInfo.payment_status !== "paid") return [];
+    if (!sessionData?.metadata?.patternSlugs || sessionData.payment_status !== "paid") return [];
     try {
-      const arr = JSON.parse(debugInfo.metadata.patternSlugs) as Array<{ slug: string; quantity: number }>;
+      const arr = JSON.parse(sessionData.metadata.patternSlugs) as Array<{ slug: string; quantity: number }>;
       const seen = new Set<string>();
       return arr.filter((p) => {
         if (seen.has(p.slug)) return false;
@@ -97,7 +81,7 @@ function CheckoutSuccessContent() {
     } catch {
       return [];
     }
-  }, [debugInfo]);
+  }, [sessionData]);
 
   if (isLoading) {
     return (
@@ -143,16 +127,35 @@ function CheckoutSuccessContent() {
             {orderPatterns.map(({ slug }) => {
               const pattern = getPatternBySlug(slug);
               const filename = `${pattern?.name || slug}.pdf`.replace(/\s+/g, "-");
+              const downloadUrl = `/api/order-pdf?session_id=${encodeURIComponent(sessionId!)}&slug=${encodeURIComponent(slug)}`;
               return (
-                <a
+                <button
                   key={slug}
-                  href={`/api/order-pdf?session_id=${encodeURIComponent(sessionId)}&slug=${encodeURIComponent(slug)}`}
-                  download={filename}
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(downloadUrl);
+                      if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        alert(err?.error || "Kunne ikke hente PDF. Prøv igen eller tjek din mail.");
+                        return;
+                      }
+                      const blob = await res.blob();
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = filename;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    } catch {
+                      alert("Kunne ikke hente PDF. Tjek din internetforbindelse eller prøv igen.");
+                    }
+                  }}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sage-200 text-sage-900 font-medium hover:bg-sage-300 transition-colors"
                 >
                   <span>📄</span>
                   {pattern?.name || slug}
-                </a>
+                </button>
               );
             })}
           </div>
@@ -190,37 +193,6 @@ function CheckoutSuccessContent() {
           <strong>Tip:</strong> Opret en konto for at se alle dine køb på ét sted og gemme favoritter.
         </p>
       </div>
-
-      {/* Debug info – skjul ved resendTestLimit (venlig besked er vist ovenfor) */}
-      {(emailError || (debugInfo && !emailResponse?.resendTestLimit)) && (
-        <div className="mt-6 p-4 rounded-xl bg-yellow-50 border border-yellow-200">
-          <h3 className="font-semibold mb-2">Debug Info:</h3>
-          {emailResponse && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
-              <p className="font-semibold text-blue-800 mb-2">Email API Response:</p>
-              <pre className="text-xs overflow-auto text-blue-700">
-                {JSON.stringify(emailResponse, null, 2)}
-              </pre>
-            </div>
-          )}
-          {emailError && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
-              <p className="font-semibold text-red-800 mb-2">Email Fejl:</p>
-              <pre className="text-xs overflow-auto text-red-700">
-                {JSON.stringify(emailError, null, 2)}
-              </pre>
-            </div>
-          )}
-          {debugInfo && (
-            <div>
-              <p className="font-semibold mb-2">Session Data:</p>
-              <pre className="text-xs overflow-auto max-h-96">
-                {JSON.stringify(debugInfo, null, 2)}
-              </pre>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
