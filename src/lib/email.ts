@@ -172,7 +172,9 @@ export async function sendPatternEmail(data: EmailData) {
     return;
   }
 
-  console.log("sendPatternEmail called for", data.email, "order", data.orderNumber, "items:", data.items.length);
+  // Normalize email to lowercase - Resend is case-sensitive for test emails
+  const normalizedEmail = data.email.toLowerCase().trim();
+  console.log("sendPatternEmail called for", normalizedEmail, "order", data.orderNumber, "items:", data.items.length);
 
   try {
     // Dynamic import to avoid build errors if Resend is not installed
@@ -213,13 +215,13 @@ export async function sendPatternEmail(data: EmailData) {
     
     const result = await resendClient.emails.send({
       from: "Stitch of Care <onboarding@resend.dev>", // Test domain - change to your domain when verified
-      to: data.email,
+      to: normalizedEmail, // Use normalized email (lowercase) for Resend compatibility
       subject: `Tak for dit køb - Ordre ${data.orderNumber} | Stitch of Care`,
       html: htmlContent,
       attachments: attachments,
     });
 
-    console.log(`✅ Email sent to ${data.email} for order ${data.orderNumber} with ${attachments.length} PDF attachments`);
+    console.log(`✅ Email sent to ${normalizedEmail} for order ${data.orderNumber} with ${attachments.length} PDF attachments`);
     console.log("📧 Resend response:", JSON.stringify(result, null, 2));
     
     // Check if Resend returned an error
