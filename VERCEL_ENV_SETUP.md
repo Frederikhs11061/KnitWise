@@ -7,11 +7,11 @@ Gå til Vercel → dit projekt → Settings → Environment Variables
 Du skal have disse 3 variables:
 
 ### 1. STRIPE_SECRET_KEY
-- **Value:** `sk_test_51T1rrgA1OXnUPMsQe1oELeUUBxyDoXIYqMPj8vE284bbFoIWSdR8JsaDyCIhG26UJfTkWkx6cdwYbUxjUnMgVrLV0028mm4kSq`
+- **Value:** `sk_test_...` (din Stripe secret key fra Stripe dashboard)
 - **Environment:** ✅ Production ✅ Preview ✅ Development
 
 ### 2. STRIPE_PUBLISHABLE_KEY  
-- **Value:** `pk_test_51T1rrgA1OXnUPMsQHXFWJjl1DY1xsEVmnb2VhJVK23pV1iyKm9ZLNuz9xUElp47c4VkHyc6c8oQfapcd3c2lXiof00KUPTpY47`
+- **Value:** `pk_test_...` (din Stripe publishable key fra Stripe dashboard)
 - **Environment:** ✅ Production ✅ Preview ✅ Development
 
 ### 3. STRIPE_WEBHOOK_SECRET
