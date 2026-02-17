@@ -1,31 +1,14 @@
 import Link from "next/link";
+import { getFeaturedPatterns } from "@/lib/patterns";
 
-const featuredPatterns = [
-  {
-    slug: "hygge-sweater",
-    name: "Hygge Sweater",
-    tagline: "En blød, oversize hverdagssweater",
-    price: 55,
-  },
-  {
-    slug: "havbrise-cardigan",
-    name: "Havbrise Cardigan",
-    tagline: "Let cardigan med strukturmønster",
-    price: 60,
-  },
-  {
-    slug: "lun-hue",
-    name: "Lun hue & hals",
-    tagline: "Perfekt begyndersæt til restegarn",
-    price: 40,
-  },
-];
+// Get featured patterns - limit to 3 for homepage
+const featuredPatterns = getFeaturedPatterns().slice(0, 3);
 
 const painPoints = [
   {
     title: "Mit garnbudget eksploderer",
     description:
-      "Opskriften bruger dyrt garn. KnitWise hjælper dig med at finde et billigere alternativ og beregner præcis hvor meget du skal købe.",
+      "Opskriften bruger dyrt garn. Vores beregnere hjælper dig med at finde et billigere alternativ og beregner præcis hvor meget du skal købe.",
     icon: "💸",
   },
   {
@@ -57,20 +40,20 @@ export default function HomePage() {
               forhindrer fejlkøb af garn.
             </h1>
             <p className="mt-5 text-base sm:text-lg text-charcoal-600 leading-relaxed">
-              Find opskrifter du får lyst til at strikke igen og igen, og brug
-              KnitWise til at regne på strikkefasthed, garn‑erstatning og
+              Find danske strikkeopskrifter du får lyst til at strikke igen og igen, og brug
+              vores strikkeberegnere til at regne på strikkefasthed, garn‑erstatning og
               garnforbrug, før du køber ind.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/opskrifter"
-                className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-charcoal-900 text-cream-50 text-sm font-semibold hover:bg-charcoal-800 transition-colors"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-rose-400 text-white text-sm font-semibold hover:bg-rose-500 transition-colors shadow-sm"
               >
                 Se opskrifter
               </Link>
               <Link
                 href="/tools"
-                className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-sage-300 text-charcoal-800 text-sm font-semibold bg-white/70 hover:bg-sage-100 transition-colors"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-xl border-2 border-sage-400 text-sage-700 text-sm font-semibold bg-white hover:bg-sage-50 transition-colors"
               >
                 Brug strikkeberegneren
               </Link>
@@ -90,7 +73,7 @@ export default function HomePage() {
                     <p className="text-sm font-semibold text-charcoal-900">
                       {p.name}
                     </p>
-                    <p className="text-xs text-charcoal-500">{p.tagline}</p>
+                    <p className="text-xs text-charcoal-500">{p.description}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-semibold text-charcoal-900">
@@ -111,7 +94,7 @@ export default function HomePage() {
       </section>
 
       {/* Pain points */}
-      <section className="px-4 py-16 bg-cream-100/60 border-b border-beige-200">
+      <section className="px-4 py-16 bg-gradient-to-b from-sage-50 to-cream-50 border-b border-beige-200">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-charcoal-900 mb-8 text-center">
             Kender du det her?
@@ -120,7 +103,7 @@ export default function HomePage() {
             {painPoints.map((point, i) => (
               <div
                 key={i}
-                className="flex flex-col gap-3 p-5 rounded-2xl bg-white border border-beige-200"
+                className="flex flex-col gap-3 p-5 rounded-2xl bg-white border-2 border-sage-200 hover:border-sage-300 transition-colors shadow-sm"
               >
                 <span className="text-2xl" aria-hidden>
                   {point.icon}

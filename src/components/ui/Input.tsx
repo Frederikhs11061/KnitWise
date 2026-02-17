@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Reusable input component for KnitWise.
+ * Reusable input component for Stitch of Care.
  * Clean labels, generous spacing, friendly placeholders.
  */
 

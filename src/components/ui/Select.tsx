@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Reusable select/dropdown component for KnitWise.
+ * Reusable select/dropdown component for Stitch of Care.
  */
 
 import { forwardRef, type SelectHTMLAttributes } from "react";

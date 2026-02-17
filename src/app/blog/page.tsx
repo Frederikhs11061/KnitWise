@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Blog om strik | Stitch of Care",
   description:
-    "Lær om strikkefasthed, garnvalg og garn-erstatning. Blogindlæg der understøtter KnitWise strikkeberegneren.",
+    "Lær om strikkefasthed, garnvalg og garn-erstatning. Blogindlæg der understøtter vores strikkeberegnere.",
 };
 
 const posts = [
@@ -40,7 +40,7 @@ export default function BlogPage() {
         </h1>
         <p className="text-charcoal-600 max-w-2xl">
           Korte, konkrete indlæg om garnvalg, strikkefasthed og hvordan du får
-          mest muligt ud af KnitWise‑beregnerne.
+          mest muligt ud af vores strikkeberegnere.
         </p>
       </header>
 

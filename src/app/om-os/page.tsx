@@ -17,7 +17,7 @@ export default function AboutPage() {
         igen og igen.
       </p>
       <p className="text-charcoal-700 text-sm leading-relaxed mb-4">
-        KnitWise‑beregnerne er bygget, fordi vi selv har prøvet at købe for dyrt
+        Vores strikkeberegnere er bygget, fordi vi selv har prøvet at købe for dyrt
         garn, tre nøgler for meget eller strikke en hel sweater, der endte to
         størrelser forkert. Det kan vi gøre bedre – særligt når man ikke gider
         sidde med hovedregning efter en lang dag.

@@ -1,5 +1,5 @@
 /**
- * Reusable card component for KnitWise tools and sections.
+ * Reusable card component for Stitch of Care tools and sections.
  * Soft, calm styling with optional animation.
  */
 

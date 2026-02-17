@@ -1,26 +1,29 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Link from "next/link";
+import Image from "next/image";
+import CartButton from "@/components/CartButton";
 
 export const metadata: Metadata = {
   title: {
     default:
-      "Stitch of Care — Strikkeopskrifter & KnitWise strikkeberegner",
+      "Stitch of Care — Strikkeopskrifter & strikkeberegner",
     template: "%s | Stitch of Care",
   },
   description:
-    "Stitch of Care samler håndtegnede strikkeopskrifter og KnitWise strikkeberegnere til garn-erstatning, maskeantal og garnforbrug.",
+    "Stitch of Care samler håndtegnede strikkeopskrifter og strikkeberegnere til garn-erstatning, maskeantal og garnforbrug. Danske strikkeopskrifter med omtanke.",
   keywords: [
     "strikkeopskrifter",
     "strikkeberegner",
+    "danske strikkeopskrifter",
     "masketal beregner",
     "garn erstatning beregner",
     "stitch of care",
   ],
   openGraph: {
-    title: "Stitch of Care — Opskrifter & KnitWise strikkeberegner",
+    title: "Stitch of Care — Danske strikkeopskrifter & strikkeberegner",
     description:
-      "Køb strikkeopskrifter og brug KnitWise strikkeberegnere til at vælge garn, beregne maskeantal og undgå at købe for meget garn.",
+      "Køb danske strikkeopskrifter og brug vores strikkeberegnere til at vælge garn, beregne maskeantal og undgå at købe for meget garn.",
   },
 };
 
@@ -32,53 +35,53 @@ export default function RootLayout({
   return (
     <html lang="da">
       <body className="font-sans antialiased">
-        <header className="border-b border-beige-200 bg-white/80 backdrop-blur-sm sticky top-0 z-20">
-          <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-6">
+        <header className="border-b border-beige-200 bg-white/95 backdrop-blur-sm sticky top-0 z-20 shadow-sm">
+          <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-6">
             <Link
               href="/"
-              className="flex items-center gap-2 text-charcoal-800 hover:text-charcoal-600 transition-colors"
+              className="flex items-center gap-3 text-forest-800 hover:text-forest-700 transition-colors"
             >
-              <span className="h-8 w-8 rounded-full bg-rose-200 border border-rose-300 flex items-center justify-center text-sm font-semibold">
-                SC
-              </span>
-              <span className="flex flex-col leading-tight">
-                <span className="text-lg font-semibold">Stitch of Care</span>
-                <span className="text-xs text-charcoal-500">
-                  Strikkeopskrifter & KnitWise beregner
-                </span>
-              </span>
+              <Image
+                src="/assets/logo.png"
+                alt="Stitch of Care logo"
+                width={120}
+                height={40}
+                className="h-10 w-auto"
+                priority
+              />
             </Link>
-            <nav className="flex items-center gap-6 text-sm font-medium text-charcoal-600">
+            <nav className="flex items-center gap-6 text-sm font-medium text-charcoal-700">
               <Link
                 href="/opskrifter"
-                className="hover:text-charcoal-900 transition-colors"
+                className="hover:text-forest-800 transition-colors"
               >
                 Opskrifter
               </Link>
               <Link
                 href="/tools"
-                className="hover:text-charcoal-900 transition-colors"
+                className="hover:text-forest-800 transition-colors"
               >
                 Strikkeberegner
               </Link>
               <Link
                 href="/blog"
-                className="hover:text-charcoal-900 transition-colors"
+                className="hover:text-forest-800 transition-colors"
               >
                 Blog
               </Link>
               <Link
                 href="/om-os"
-                className="hover:text-charcoal-900 transition-colors"
+                className="hover:text-forest-800 transition-colors"
               >
                 Om os
               </Link>
               <Link
-                href="/kurv"
-                className="ml-4 px-3 py-1.5 rounded-full border border-beige-200 hover:border-charcoal-800 hover:text-charcoal-900 transition-colors"
+                href="/login"
+                className="px-3 py-1.5 rounded-full border border-sage-300 hover:border-sage-400 hover:bg-sage-50 transition-colors"
               >
-                Kurv (0)
+                Log ind
               </Link>
+              <CartButton />
             </nav>
           </div>
         </header>
