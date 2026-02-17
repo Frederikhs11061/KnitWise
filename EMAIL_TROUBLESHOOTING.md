@@ -2,6 +2,17 @@
 
 ## Problem: Ingen email efter køb
 
+### 0. Test om ordre-mailen virker (uden Stripe)
+
+Åbn i browseren (efter deploy):
+
+```
+https://stichofcare.vercel.app/api/test-order-email?email=DIN@EMAIL.dk
+```
+
+- **Får du mail med PDF** → Ordre-mail + Resend virker. Problemet er at Stripe ikke kalder webhook’en (eller webhook secret matcher ikke).
+- **Får du ingen mail** → Tjek Vercel Functions-logs for `/api/test-order-email` og Resend dashboard for fejl.
+
 ### 1. Tjek Vercel Logs
 
 1. Gå til Vercel → dit projekt → Deployments
