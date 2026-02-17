@@ -3,11 +3,21 @@ import { generateOrderNumber } from "@/lib/user";
 
 // Dynamic import to avoid build errors if Stripe is not installed
 async function getStripe() {
-  if (!process.env.STRIPE_SECRET_KEY) {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  
+  if (!secretKey) {
+    console.error("STRIPE_SECRET_KEY is missing from environment variables");
+    console.error("Available env vars:", Object.keys(process.env).filter(k => k.includes("STRIPE")));
     throw new Error("STRIPE_SECRET_KEY not configured");
   }
+  
+  if (!secretKey.startsWith("sk_")) {
+    console.error("STRIPE_SECRET_KEY does not look valid (should start with sk_)");
+    throw new Error("Invalid STRIPE_SECRET_KEY format");
+  }
+  
   const Stripe = (await import("stripe")).default;
-  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+  return new Stripe(secretKey, {
     apiVersion: "2025-02-24.acacia",
   });
 }
@@ -29,11 +39,20 @@ interface CheckoutRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if Stripe is configured
-    if (!process.env.STRIPE_SECRET_KEY) {
+    // Check if Stripe is configured - with detailed logging
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    console.log("Checking STRIPE_SECRET_KEY:", {
+      exists: !!secretKey,
+      length: secretKey?.length,
+      startsWith: secretKey?.substring(0, 5),
+      allStripeVars: Object.keys(process.env).filter(k => k.includes("STRIPE")),
+    });
+    
+    if (!secretKey) {
       console.error("STRIPE_SECRET_KEY is not configured");
+      console.error("Available environment variables:", Object.keys(process.env).filter(k => k.includes("STRIPE")));
       return NextResponse.json(
-        { error: "Stripe er ikke konfigureret. Tjek environment variables." },
+        { error: "Stripe er ikke konfigureret. Tjek environment variables og redeploy." },
         { status: 500 }
       );
     }
