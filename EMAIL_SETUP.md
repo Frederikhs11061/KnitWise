@@ -20,11 +20,14 @@ For at sende fra dit eget domæne:
 2. Klik "Create API Key"
 3. Giv den et navn (f.eks. "Stitch of Care Production")
 4. Kopier API key (starter med `re_`)
-5. Tilføj til `.env.local`:
-
-```env
-RESEND_API_KEY=re_din_api_key
-```
+5. Tilføj til Vercel Environment Variables:
+   - Gå til Vercel → dit projekt → Settings → Environment Variables
+   - Klik "Add New"
+   - Name: `RESEND_API_KEY`
+   - Value: `re_...` (din API key)
+   - Environments: Production, Preview, Development (alle tre)
+   - Klik "Save"
+6. Redeploy projektet i Vercel
 
 ## 4. Installer Resend package
 

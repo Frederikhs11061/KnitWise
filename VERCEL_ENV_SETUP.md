@@ -14,18 +14,33 @@ Du skal have disse 3 variables:
 - **Value:** `pk_test_...` (din Stripe publishable key fra Stripe dashboard)
 - **Environment:** ✅ Production ✅ Preview ✅ Development
 
-### 3. STRIPE_WEBHOOK_SECRET
+### 3. STRIPE_WEBHOOK_S
+ECRET
 - **Value:** Den du kopierede fra Stripe (starter med `whsec_`)
 - **Environment:** ✅ Production ✅ Preview ✅ Development
 
-## 🔧 Hvis de mangler:
+## 🔧 VIGTIGT: Opret dem direkte på projektet!
+
+Hvis du har problemer med at linke environment variables, er det bedst at **slette de gamle og oprette dem direkte på projektet**.
+
+### Sådan gør du det:
 
 1. Gå til Vercel → dit projekt → Settings → Environment Variables
-2. Klik "Add New" for hver manglende variable
-3. Udfyld Name og Value (se ovenfor)
-4. Marker alle environments
-5. Klik "Save"
-6. **VIGTIGT:** Gå til Deployments → Redeploy den seneste deployment
+2. **Slet de eksisterende** (hvis de findes):
+   - Klik på "..." ved hver variable
+   - Vælg "Delete"
+   - Bekræft sletning
+3. **Opret dem på ny direkte på projektet:**
+   - Klik "Add New"
+   - **Name:** `STRIPE_SECRET_KEY`
+   - **Value:** Din Stripe secret key (`sk_test_...`)
+   - **Environments:** ✅ Production ✅ Preview ✅ Development
+   - **Link to Projects:** Vælg dit projekt (skal automatisk være valgt, da du er på projektet)
+   - Klik "Save"
+4. **Gentag for de andre 2:**
+   - `STRIPE_PUBLISHABLE_KEY` (value: `pk_test_...`)
+   - `STRIPE_WEBHOOK_SECRET` (value: `whsec_...`)
+5. **VIGTIGT:** Gå til Deployments → Redeploy den seneste deployment
 
 ## ✅ Efter opdatering:
 

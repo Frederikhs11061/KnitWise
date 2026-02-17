@@ -13,6 +13,154 @@ interface EmailData {
   }>;
 }
 
+function generateEmailTemplate(data: EmailData): string {
+  const itemList = data.items
+    .map(
+      (item) => `
+      <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #e8e2d8;">
+          <div style="font-size: 16px; color: #2d2d2d; font-weight: 500;">
+            ${item.patternName}
+          </div>
+          <div style="font-size: 14px; color: #6b6b6b; margin-top: 4px;">
+            Antal: ${item.quantity}
+          </div>
+        </td>
+      </tr>
+    `
+    )
+    .join("");
+
+  return `
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tak for dit køb - Stitch of Care</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #faf9f7; line-height: 1.6;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #faf9f7;">
+    <tr>
+      <td style="padding: 40px 20px;">
+        <!-- Container -->
+        <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #f5e8e6 0%, #e8ebe6 100%); padding: 40px 30px; text-align: center;">
+              <div style="font-size: 28px; font-weight: 600; color: #2d2d2d; margin-bottom: 8px;">
+                Stitch of Care
+              </div>
+              <div style="font-size: 16px; color: #6b6b6b;">
+                Tak for dit køb!
+              </div>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              
+              <!-- Success Icon -->
+              <div style="text-align: center; margin-bottom: 30px;">
+                <div style="width: 64px; height: 64px; background-color: #e8ebe6; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                  <span style="font-size: 32px;">✓</span>
+                </div>
+              </div>
+
+              <!-- Main Message -->
+              <h1 style="font-size: 24px; color: #2d2d2d; margin: 0 0 16px 0; text-align: center; font-weight: 600;">
+                Din betaling er gennemført
+              </h1>
+              
+              <p style="font-size: 16px; color: #4a4a4a; margin: 0 0 30px 0; text-align: center; line-height: 1.6;">
+                Tak for dit køb hos Stitch of Care! Dine opskrifter er sendt til denne email.
+              </p>
+
+              <!-- Order Details -->
+              <div style="background-color: #faf9f7; border-radius: 6px; padding: 24px; margin-bottom: 30px;">
+                <div style="font-size: 14px; color: #6b6b6b; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                  Ordrenummer
+                </div>
+                <div style="font-size: 20px; color: #2d2d2d; font-weight: 600; font-family: monospace;">
+                  ${data.orderNumber}
+                </div>
+              </div>
+
+              <!-- Items List -->
+              <div style="margin-bottom: 30px;">
+                <h2 style="font-size: 18px; color: #2d2d2d; margin: 0 0 16px 0; font-weight: 600;">
+                  Dine opskrifter
+                </h2>
+                <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                  ${itemList}
+                </table>
+              </div>
+
+              <!-- Info Box -->
+              <div style="background-color: #f5e8e6; border-left: 4px solid #c49a94; padding: 20px; border-radius: 4px; margin-bottom: 30px;">
+                <div style="font-size: 16px; color: #2d2d2d; font-weight: 600; margin-bottom: 8px;">
+                  📎 Hvad sker der nu?
+                </div>
+                <ul style="margin: 0; padding-left: 20px; color: #4a4a4a; font-size: 14px; line-height: 1.8;">
+                  <li>Du modtager en email med dine opskrifter som PDF-filer</li>
+                  <li>Hvis du ikke modtager emailen inden for 24 timer, kontakt support</li>
+                  <li>Du kan også finde dem i din <a href="https://stichofcare.vercel.app/profil" style="color: #b87d75; text-decoration: underline;">købshistorik</a></li>
+                </ul>
+              </div>
+
+              <!-- CTA Buttons -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <tr>
+                  <td style="padding: 0 8px 0 0;">
+                    <a href="https://stichofcare.vercel.app/opskrifter" style="display: block; background-color: #c49a94; color: #ffffff; text-decoration: none; padding: 14px 24px; border-radius: 6px; text-align: center; font-weight: 500; font-size: 16px;">
+                      Se flere opskrifter
+                    </a>
+                  </td>
+                  <td style="padding: 0 0 0 8px;">
+                    <a href="https://stichofcare.vercel.app/profil" style="display: block; background-color: #ffffff; color: #b87d75; text-decoration: none; padding: 14px 24px; border-radius: 6px; text-align: center; font-weight: 500; font-size: 16px; border: 2px solid #c49a94;">
+                      Se købshistorik
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Footer -->
+              <div style="border-top: 1px solid #e8e2d8; padding-top: 30px; text-align: center;">
+                <p style="font-size: 14px; color: #6b6b6b; margin: 0 0 8px 0;">
+                  Med venlig hilsen,<br>
+                  <strong style="color: #2d2d2d;">Stitch of Care</strong>
+                </p>
+                <p style="font-size: 12px; color: #6b6b6b; margin: 0;">
+                  <a href="https://stichofcare.vercel.app" style="color: #b87d75; text-decoration: none;">stichofcare.vercel.app</a> | 
+                  <a href="mailto:kontakt@stitchofcare.dk" style="color: #b87d75; text-decoration: none;">kontakt@stitchofcare.dk</a>
+                </p>
+              </div>
+
+            </td>
+          </tr>
+        </table>
+
+        <!-- Footer Note -->
+        <table role="presentation" style="max-width: 600px; margin: 20px auto 0;">
+          <tr>
+            <td style="text-align: center; padding: 20px; font-size: 12px; color: #6b6b6b;">
+              <p style="margin: 0;">
+                Dette er en automatisk email. Svar ikke på denne email.
+              </p>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}
+
 export async function sendPatternEmail(data: EmailData) {
   // In production, use Resend or similar service
   // For now, we'll simulate it
@@ -29,47 +177,51 @@ export async function sendPatternEmail(data: EmailData) {
     const { Resend } = await import("resend");
     const resendClient = new Resend(process.env.RESEND_API_KEY);
 
-    // Build email content
-    const itemList = data.items
-      .map((item) => `- ${item.patternName} (${item.quantity}x)`)
-      .join("\n");
+    // Generate HTML email template
+    const htmlContent = generateEmailTemplate(data);
 
-    const emailContent = `
-Hej!
-
-Tak for dit køb hos Stitch of Care!
-
-Din ordre: ${data.orderNumber}
-
-Du har købt følgende opskrifter:
-${itemList}
-
-Dine opskrifter er vedhæftet som PDF-filer i denne email.
-
-Held og lykke med strikningen!
-
-Med venlig hilsen,
-Stitch of Care
-    `.trim();
-
-    // Send email with PDF attachments
-    // Note: In production, you would attach actual PDF files here
-    await resendClient.emails.send({
-      from: "Stitch of Care <noreply@stitchofcare.dk>",
-      to: data.email,
-      subject: `Din opskrift fra Stitch of Care - Ordre ${data.orderNumber}`,
-      html: emailContent.replace(/\n/g, "<br>"),
-      // attachments: [
-      //   {
-      //     filename: `${data.orderNumber}.pdf`,
-      //     content: pdfBuffer,
-      //   },
-      // ],
+    // Generate PDFs for all patterns in the order
+    const { generatePatternPDFs } = await import("./pdf");
+    
+    // Get all pattern slugs (including duplicates for quantity > 1)
+    const patternSlugs: string[] = [];
+    data.items.forEach((item) => {
+      for (let i = 0; i < item.quantity; i++) {
+        patternSlugs.push(item.patternSlug);
+      }
     });
 
-    console.log(`Email sent to ${data.email} for order ${data.orderNumber}`);
-  } catch (error) {
+    // Generate PDFs
+    const pdfs = await generatePatternPDFs(patternSlugs);
+
+    // Convert PDFs to base64 for Resend attachments
+    const attachments = pdfs.map((pdf) => ({
+      filename: pdf.filename,
+      content: pdf.buffer.toString("base64"),
+    }));
+
+    // Send email with PDF attachments
+    // Use Resend's test domain if custom domain not verified
+    // Change to "noreply@stitchofcare.dk" once domain is verified in Resend
+    const result = await resendClient.emails.send({
+      from: "Stitch of Care <onboarding@resend.dev>", // Test domain - change to your domain when verified
+      to: data.email,
+      subject: `Tak for dit køb - Ordre ${data.orderNumber} | Stitch of Care`,
+      html: htmlContent,
+      attachments: attachments,
+    });
+
+    console.log(`Email sent to ${data.email} for order ${data.orderNumber} with ${attachments.length} PDF attachments`);
+    console.log("Resend response:", result);
+  } catch (error: any) {
     console.error("Error sending email:", error);
-    throw error;
+    console.error("Error details:", {
+      message: error?.message,
+      name: error?.name,
+      stack: error?.stack,
+      response: error?.response,
+    });
+    // Don't throw - log error but don't break webhook
+    // Email failures shouldn't prevent purchase completion
   }
 }
