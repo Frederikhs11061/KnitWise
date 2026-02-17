@@ -215,6 +215,9 @@ export async function sendPatternEmail(data: EmailData) {
 
     console.log(`Email sent to ${data.email} for order ${data.orderNumber} with ${attachments.length} PDF attachments`);
     console.log("Resend response:", result);
+    
+    // Return result for verification
+    return result;
   } catch (error: any) {
     console.error("Error sending email:", error);
     console.error("Error details:", {
@@ -223,7 +226,7 @@ export async function sendPatternEmail(data: EmailData) {
       stack: error?.stack,
       response: error?.response,
     });
-    // Don't throw - log error but don't break webhook
-    // Email failures shouldn't prevent purchase completion
+    // Throw error så det bliver fanget i send-order-email endpointet
+    throw new Error(`Failed to send email: ${error?.message || "Unknown error"}`);
   }
 }
