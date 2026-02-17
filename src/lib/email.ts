@@ -204,9 +204,11 @@ export async function sendPatternEmail(data: EmailData) {
       }));
       console.log(`📎 Attaching ${attachments.length} PDFs to email`);
     } catch (pdfError: any) {
-      console.error("❌ PDF generation failed, sending email without attachments:", pdfError?.message);
+      console.error("❌ PDF generation failed:", pdfError?.message);
       console.error("PDF error details:", pdfError);
-      // Don't throw - send email without PDFs rather than failing completely
+      if (patternSlugs.length > 0) {
+        throw new Error(`Kunne ikke generere PDF-opskrifter: ${pdfError?.message || "Ukendt fejl"}`);
+      }
     }
 
     // Send email (with or without PDF attachments)

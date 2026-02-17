@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, useMemo, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { clearCart } from "@/lib/cart";
-import { getPurchaseHistory } from "@/lib/user";
+import { getPatternBySlug } from "@/lib/patterns";
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
@@ -20,7 +20,6 @@ function CheckoutSuccessContent() {
       // Clear cart after successful payment
       clearCart();
       
-      // Debug: Tjek session først
       const checkSession = async () => {
         try {
           const res = await fetch(`/api/check-session?session_id=${sessionId}`);
@@ -31,6 +30,7 @@ function CheckoutSuccessContent() {
           console.error("Error checking session:", error);
         }
       };
+      checkSession();
       
       // Send email direkte fra success-siden (workaround hvis webhook ikke virker)
       // Vent lidt først - Stripe session kan være lidt langsom med at opdatere payment_status
@@ -77,17 +77,27 @@ function CheckoutSuccessContent() {
         }
       };
       
-      // Tjek session først (for debugging)
-      checkSession();
-      
-      // Vent 1 sekund før første forsøg (giver Stripe tid til at opdatere session)
       setTimeout(() => sendEmail(), 1000);
-      
       setIsLoading(false);
     } else {
       router.push("/kurv");
     }
   }, [sessionId, router]);
+
+  const orderPatterns = useMemo(() => {
+    if (!debugInfo?.metadata?.patternSlugs || debugInfo.payment_status !== "paid") return [];
+    try {
+      const arr = JSON.parse(debugInfo.metadata.patternSlugs) as Array<{ slug: string; quantity: number }>;
+      const seen = new Set<string>();
+      return arr.filter((p) => {
+        if (seen.has(p.slug)) return false;
+        seen.add(p.slug);
+        return true;
+      });
+    } catch {
+      return [];
+    }
+  }, [debugInfo]);
 
   if (isLoading) {
     return (
@@ -118,6 +128,34 @@ function CheckoutSuccessContent() {
           <p className="text-sm text-amber-800">
             <strong>Bemærk:</strong> Ordrebekræftelse med opskrifter sendes normalt på mail. Hvis du ikke modtager en mail inden for kort tid, tjek spam-mappen eller kontakt os – så sender vi opskrifterne manuelt.
           </p>
+        </div>
+      )}
+
+      {sessionId && orderPatterns.length > 0 && (
+        <div className="mb-6 p-6 rounded-xl bg-sage-50 border border-sage-200">
+          <h2 className="font-semibold text-charcoal-900 mb-3">
+            Download dine opskrifter
+          </h2>
+          <p className="text-sm text-charcoal-600 mb-4">
+            Du kan downloade dine strikkeopskrifter som PDF her – eller vent på mailen.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            {orderPatterns.map(({ slug }) => {
+              const pattern = getPatternBySlug(slug);
+              const filename = `${pattern?.name || slug}.pdf`.replace(/\s+/g, "-");
+              return (
+                <a
+                  key={slug}
+                  href={`/api/order-pdf?session_id=${encodeURIComponent(sessionId)}&slug=${encodeURIComponent(slug)}`}
+                  download={filename}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sage-200 text-sage-900 font-medium hover:bg-sage-300 transition-colors"
+                >
+                  <span>📄</span>
+                  {pattern?.name || slug}
+                </a>
+              );
+            })}
+          </div>
         </div>
       )}
 
