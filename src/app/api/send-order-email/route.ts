@@ -115,16 +115,19 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    // Send email hvis customer_email findes
-    if (session.customer_email) {
+    // Email kan være i customer_email (gammel) eller customer_details.email (ny Stripe API)
+    const email = session.customer_email || (session as any).customer_details?.email;
+
+    // Send email hvis email findes
+    if (email) {
       console.log("Sending order email directly from success page:", {
         sessionId,
-        email: session.customer_email,
+        email,
         orderNumber,
       });
 
       await sendPatternEmail({
-        email: session.customer_email,
+        email,
         orderNumber,
         items: purchaseItems,
       });
@@ -146,12 +149,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: "Email sendt",
-        email: session.customer_email,
+        email,
         orderNumber,
       });
     } else {
+      console.error("No email on session:", {
+        customer_email: session.customer_email,
+        customer_details: (session as any).customer_details,
+      });
       return NextResponse.json(
-        { error: "Ingen email på session", sessionId },
+        { error: "Ingen email på session (tjek customer_details)", sessionId },
         { status: 400 }
       );
     }

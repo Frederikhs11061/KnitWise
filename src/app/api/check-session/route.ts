@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
       sessionId,
       payment_status: session.payment_status,
       customer_email: session.customer_email,
+      customer_details: (session as any).customer_details,
       customer: session.customer,
       metadata: session.metadata,
       mode: session.mode,
