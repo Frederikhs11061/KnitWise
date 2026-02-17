@@ -63,12 +63,19 @@ export async function POST(request: NextRequest) {
         message: "STRIPE_SECRET_KEY is not configured",
         availableStripeVars: Object.keys(process.env).filter(k => k.toUpperCase().includes("STRIPE")),
         nodeEnv: process.env.NODE_ENV,
+        allEnvKeys: Object.keys(process.env).slice(0, 20), // First 20 for debugging
       };
       console.error("Stripe configuration error:", errorDetails);
+      
+      // Return detailed error info to help debug
       return NextResponse.json(
         { 
           error: "Stripe er ikke konfigureret. Tjek environment variables og redeploy.",
-          debug: process.env.NODE_ENV === "development" ? errorDetails : undefined,
+          debug: {
+            availableStripeVars: Object.keys(process.env).filter(k => k.toUpperCase().includes("STRIPE")),
+            nodeEnv: process.env.NODE_ENV,
+            hint: "Tjek at STRIPE_SECRET_KEY er sat op i Vercel → Settings → Environment Variables og at du har redeployed",
+          },
         },
         { status: 500 }
       );
