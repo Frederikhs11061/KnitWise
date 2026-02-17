@@ -16,6 +16,27 @@ function CheckoutSuccessContent() {
     if (sessionId) {
       // Clear cart after successful payment
       clearCart();
+      
+      // Send email direkte fra success-siden (workaround hvis webhook ikke virker)
+      fetch("/api/send-order-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            console.log("Order email sent:", data);
+          } else if (data.alreadySent) {
+            console.log("Email already sent previously");
+          } else {
+            console.error("Failed to send order email:", data);
+          }
+        })
+        .catch((error) => {
+          console.error("Error calling send-order-email:", error);
+        });
+      
       setIsLoading(false);
     } else {
       router.push("/kurv");
