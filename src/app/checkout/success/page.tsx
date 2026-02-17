@@ -11,6 +11,7 @@ function CheckoutSuccessContent() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [emailError, setEmailError] = useState<any>(null);
   const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
@@ -53,6 +54,7 @@ function CheckoutSuccessContent() {
             return;
           } else {
             console.error("❌ Failed to send order email:", data);
+            setEmailError(data);
             // Vis fejl til brugeren
             alert(`Kunne ikke sende email automatisk. Fejl: ${data.error || "Ukendt fejl"}\n\nTjek browser console (F12) for detaljer.`);
           }
@@ -132,13 +134,26 @@ function CheckoutSuccessContent() {
         </p>
       </div>
 
-      {/* Debug info (kun i development) */}
-      {process.env.NODE_ENV === "development" && debugInfo && (
+      {/* Debug info - vis altid hvis der er fejl eller debug data */}
+      {(emailError || debugInfo) && (
         <div className="mt-6 p-4 rounded-xl bg-yellow-50 border border-yellow-200">
           <h3 className="font-semibold mb-2">Debug Info:</h3>
-          <pre className="text-xs overflow-auto">
-            {JSON.stringify(debugInfo, null, 2)}
-          </pre>
+          {emailError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
+              <p className="font-semibold text-red-800 mb-2">Email Fejl:</p>
+              <pre className="text-xs overflow-auto text-red-700">
+                {JSON.stringify(emailError, null, 2)}
+              </pre>
+            </div>
+          )}
+          {debugInfo && (
+            <div>
+              <p className="font-semibold mb-2">Session Data:</p>
+              <pre className="text-xs overflow-auto max-h-96">
+                {JSON.stringify(debugInfo, null, 2)}
+              </pre>
+            </div>
+          )}
         </div>
       )}
     </div>

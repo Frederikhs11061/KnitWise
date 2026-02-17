@@ -176,6 +176,7 @@ export async function POST(request: NextRequest) {
         customer_email_from_customer: typeof session.customer === 'object' ? (session.customer as any)?.email : null,
         full_session_keys: Object.keys(session).slice(0, 20), // Første 20 keys for debugging
       });
+      // Returner fuld debug info så vi kan se præcist hvad Stripe sender
       return NextResponse.json(
         { 
           error: "Ingen email på session", 
@@ -183,7 +184,13 @@ export async function POST(request: NextRequest) {
           debug: {
             customer_email: session.customer_email,
             customer_details: sessionAny.customer_details,
+            customer_details_email: sessionAny.customer_details?.email,
             customer: session.customer,
+            customer_email_from_customer: typeof session.customer === 'object' && session.customer ? (session.customer as any).email : null,
+            all_session_keys: Object.keys(session).slice(0, 30),
+            payment_status: session.payment_status,
+            mode: session.mode,
+            status: session.status,
           }
         },
         { status: 400 }
