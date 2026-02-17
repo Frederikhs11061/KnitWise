@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Email Endpoints</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-box {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #c49a94;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #b87d75;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .result {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .success {
+      background: #e8ebe6;
+      border-left: 4px solid #7a8f6d;
+    }
+    .error {
+      background: #f5e8e6;
+      border-left: 4px solid #c49a94;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test Email Endpoints</h1>
+  
+  <div class="test-box">
+    <h2>Test 1: Simpel Email (uden PDF)</h2>
+    <p>Sender en simpel test-email for at tjekke om Resend virker.</p>
+    <input type="email" id="email1" placeholder="din@email.dk" value="frederik.hs@live.dk">
+    <button onclick="testSimple()">Send Simpel Email</button>
+    <div id="result1" class="result" style="display:none;"></div>
+  </div>
+
+  <div class="test-box">
+    <h2>Test 2: Test Webhook (med PDF)</h2>
+    <p>Simulerer webhook og sender ordre-email med PDF.</p>
+    <input type="email" id="email2" placeholder="din@email.dk" value="frederik.hs@live.dk">
+    <button onclick="testWebhook()">Send Test Webhook Email</button>
+    <div id="result2" class="result" style="display:none;"></div>
+  </div>
+
+  <script>
+    async function testSimple() {
+      const email = document.getElementById('email1').value;
+      const resultDiv = document.getElementById('result1');
+      resultDiv.style.display = 'block';
+      resultDiv.textContent = 'Sender...';
+      resultDiv.className = 'result';
+
+      try {
+        const res = await fetch('https://stichofcare.vercel.app/api/test-email-simple', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({email: email})
+        });
+        const data = await res.json();
+        resultDiv.textContent = JSON.stringify(data, null, 2);
+        resultDiv.className = res.ok ? 'result success' : 'result error';
+      } catch (error) {
+        resultDiv.textContent = 'Fejl: ' + error.message;
+        resultDiv.className = 'result error';
+      }
+    }
+
+    async function testWebhook() {
+      const email = document.getElementById('email2').value;
+      const resultDiv = document.getElementById('result2');
+      resultDiv.style.display = 'block';
+      resultDiv.textContent = 'Sender...';
+      resultDiv.className = 'result';
+
+      try {
+        const res = await fetch('https://stichofcare.vercel.app/api/test-webhook', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({email: email, patternSlug: 'hygge-sweater'})
+        });
+        const data = await res.json();
+        resultDiv.textContent = JSON.stringify(data, null, 2);
+        resultDiv.className = res.ok ? 'result success' : 'result error';
+      } catch (error) {
+        resultDiv.textContent = 'Fejl: ' + error.message;
+        resultDiv.className = 'result error';
+      }
+    }
+  </script>
+</body>
+</html>
