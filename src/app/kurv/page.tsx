@@ -104,7 +104,9 @@ export default function CartPage() {
       }
     } catch (error) {
       console.error("Checkout error:", error);
-      alert(error instanceof Error ? error.message : "Der opstod en fejl ved checkout");
+      const errorMessage = error instanceof Error ? error.message : "Der opstod en fejl ved checkout";
+      console.error("Full error:", error);
+      alert(errorMessage + "\n\nTjek browser console (F12) for flere detaljer.");
       setIsLoading(false);
     }
   };
