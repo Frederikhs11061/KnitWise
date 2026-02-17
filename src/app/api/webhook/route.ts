@@ -89,11 +89,15 @@ export async function POST(request: NextRequest) {
 
       // Send email with PDF patterns
       if (session.customer_email) {
+        console.log("Webhook: sending email to", session.customer_email, "order", orderNumber);
         await sendPatternEmail({
           email: session.customer_email,
           orderNumber,
           items: purchaseItems,
         });
+        console.log("Webhook: sendPatternEmail completed");
+      } else {
+        console.log("Webhook: no customer_email on session, skipping email");
       }
 
       return NextResponse.json({ received: true });

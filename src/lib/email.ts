@@ -172,6 +172,8 @@ export async function sendPatternEmail(data: EmailData) {
     return;
   }
 
+  console.log("sendPatternEmail called for", data.email, "order", data.orderNumber, "items:", data.items.length);
+
   try {
     // Dynamic import to avoid build errors if Resend is not installed
     const { Resend } = await import("resend");
@@ -180,9 +182,6 @@ export async function sendPatternEmail(data: EmailData) {
     // Generate HTML email template
     const htmlContent = generateEmailTemplate(data);
 
-    // Generate PDFs for all patterns in the order
-    const { generatePatternPDFs } = await import("./pdf");
-    
     // Get all pattern slugs (including duplicates for quantity > 1)
     const patternSlugs: string[] = [];
     data.items.forEach((item) => {
@@ -191,16 +190,19 @@ export async function sendPatternEmail(data: EmailData) {
       }
     });
 
-    // Generate PDFs
-    const pdfs = await generatePatternPDFs(patternSlugs);
+    let attachments: { filename: string; content: string }[] = [];
+    try {
+      const { generatePatternPDFs } = await import("./pdf");
+      const pdfs = await generatePatternPDFs(patternSlugs);
+      attachments = pdfs.map((pdf) => ({
+        filename: pdf.filename,
+        content: pdf.buffer.toString("base64"),
+      }));
+    } catch (pdfError: any) {
+      console.error("PDF generation failed, sending email without attachments:", pdfError?.message);
+    }
 
-    // Convert PDFs to base64 for Resend attachments
-    const attachments = pdfs.map((pdf) => ({
-      filename: pdf.filename,
-      content: pdf.buffer.toString("base64"),
-    }));
-
-    // Send email with PDF attachments
+    // Send email (with or without PDF attachments)
     // Use Resend's test domain if custom domain not verified
     // Change to "noreply@stitchofcare.dk" once domain is verified in Resend
     const result = await resendClient.emails.send({
