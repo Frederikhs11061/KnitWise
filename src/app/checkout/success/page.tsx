@@ -12,6 +12,7 @@ function CheckoutSuccessContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [emailError, setEmailError] = useState<any>(null);
+  const [emailResponse, setEmailResponse] = useState<any>(null);
   const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
@@ -35,6 +36,7 @@ function CheckoutSuccessContent() {
       // Vent lidt først - Stripe session kan være lidt langsom med at opdatere payment_status
       const sendEmail = async (retryCount = 0) => {
         try {
+          console.log("📧 Calling /api/send-order-email with sessionId:", sessionId);
           const res = await fetch("/api/send-order-email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -42,6 +44,8 @@ function CheckoutSuccessContent() {
           });
           
           const data = await res.json();
+          setEmailResponse(data); // Gem altid responsen så vi kan se den
+          console.log("📧 Email API response:", data);
           
           if (data.success) {
             console.log("✅ Order email sent:", data);
@@ -60,6 +64,7 @@ function CheckoutSuccessContent() {
           }
         } catch (error) {
           console.error("❌ Error calling send-order-email:", error);
+          setEmailError({ error: "Network error", details: error });
           if (retryCount < 2) {
             setTimeout(() => sendEmail(retryCount + 1), 2000);
           } else {
@@ -135,9 +140,17 @@ function CheckoutSuccessContent() {
       </div>
 
       {/* Debug info - vis altid hvis der er fejl eller debug data */}
-      {(emailError || debugInfo) && (
+      {(emailError || emailResponse || debugInfo) && (
         <div className="mt-6 p-4 rounded-xl bg-yellow-50 border border-yellow-200">
           <h3 className="font-semibold mb-2">Debug Info:</h3>
+          {emailResponse && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+              <p className="font-semibold text-blue-800 mb-2">Email API Response:</p>
+              <pre className="text-xs overflow-auto text-blue-700">
+                {JSON.stringify(emailResponse, null, 2)}
+              </pre>
+            </div>
+          )}
           {emailError && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
               <p className="font-semibold text-red-800 mb-2">Email Fejl:</p>
