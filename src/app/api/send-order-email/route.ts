@@ -136,34 +136,51 @@ export async function POST(request: NextRequest) {
         sessionId,
         email,
         orderNumber,
+        itemsCount: purchaseItems.length,
       });
 
-      await sendPatternEmail({
-        email,
-        orderNumber,
-        items: purchaseItems,
-      });
-
-      // Marker at email er sendt (opdater session metadata)
       try {
-        await stripe.checkout.sessions.update(sessionId, {
-          metadata: {
-            ...session.metadata,
-            email_sent: "true",
-            email_sent_at: new Date().toISOString(),
-          },
+        await sendPatternEmail({
+          email,
+          orderNumber,
+          items: purchaseItems,
         });
-      } catch (updateError) {
-        console.error("Could not update session metadata:", updateError);
-        // Ignore - email er sendt alligevel
-      }
 
-      return NextResponse.json({
-        success: true,
-        message: "Email sendt",
-        email,
-        orderNumber,
-      });
+        console.log("✅ Email sendt succesfuldt til:", email);
+
+        // Marker at email er sendt (opdater session metadata)
+        try {
+          await stripe.checkout.sessions.update(sessionId, {
+            metadata: {
+              ...session.metadata,
+              email_sent: "true",
+              email_sent_at: new Date().toISOString(),
+            },
+          });
+        } catch (updateError) {
+          console.error("Could not update session metadata:", updateError);
+          // Ignore - email er sendt alligevel
+        }
+
+        return NextResponse.json({
+          success: true,
+          message: "Email sendt",
+          email,
+          orderNumber,
+        });
+      } catch (emailError: any) {
+        console.error("❌ Fejl ved afsendelse af email:", emailError);
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Kunne ikke sende email",
+            email,
+            orderNumber,
+            details: emailError?.message || "Ukendt fejl",
+          },
+          { status: 500 }
+        );
+      }
     } else {
       // Log alt hvad vi har fundet for debugging
       console.error("No email found on session - all checked locations:", {
