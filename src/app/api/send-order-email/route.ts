@@ -140,13 +140,14 @@ export async function POST(request: NextRequest) {
       });
 
       try {
-        await sendPatternEmail({
+        const emailResult = await sendPatternEmail({
           email,
           orderNumber,
           items: purchaseItems,
         });
 
         console.log("✅ Email sendt succesfuldt til:", email);
+        console.log("📧 Email result:", JSON.stringify(emailResult, null, 2));
 
         // Marker at email er sendt (opdater session metadata)
         try {
@@ -167,6 +168,10 @@ export async function POST(request: NextRequest) {
           message: "Email sendt",
           email,
           orderNumber,
+          resendResult: emailResult ? {
+            id: emailResult.data?.id,
+            error: emailResult.error,
+          } : null,
         });
       } catch (emailError: any) {
         console.error("❌ Fejl ved afsendelse af email:", emailError);

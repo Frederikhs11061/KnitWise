@@ -205,6 +205,12 @@ export async function sendPatternEmail(data: EmailData) {
     // Send email (with or without PDF attachments)
     // Use Resend's test domain if custom domain not verified
     // Change to "noreply@stitchofcare.dk" once domain is verified in Resend
+    console.log("📧 Attempting to send email via Resend:", {
+      to: data.email,
+      subject: `Tak for dit køb - Ordre ${data.orderNumber} | Stitch of Care`,
+      attachmentsCount: attachments.length,
+    });
+    
     const result = await resendClient.emails.send({
       from: "Stitch of Care <onboarding@resend.dev>", // Test domain - change to your domain when verified
       to: data.email,
@@ -213,8 +219,19 @@ export async function sendPatternEmail(data: EmailData) {
       attachments: attachments,
     });
 
-    console.log(`Email sent to ${data.email} for order ${data.orderNumber} with ${attachments.length} PDF attachments`);
-    console.log("Resend response:", result);
+    console.log(`✅ Email sent to ${data.email} for order ${data.orderNumber} with ${attachments.length} PDF attachments`);
+    console.log("📧 Resend response:", JSON.stringify(result, null, 2));
+    
+    // Check if Resend returned an error
+    if (result.error) {
+      console.error("❌ Resend returned error:", result.error);
+      throw new Error(`Resend API error: ${JSON.stringify(result.error)}`);
+    }
+    
+    if (!result.data || !result.data.id) {
+      console.error("❌ Resend response missing data.id:", result);
+      throw new Error(`Resend API returned invalid response: ${JSON.stringify(result)}`);
+    }
     
     // Return result for verification
     return result;
