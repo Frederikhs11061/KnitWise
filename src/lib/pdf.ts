@@ -16,38 +16,42 @@ export async function generatePatternPDF(patternSlug: string): Promise<Buffer> {
     throw new Error(`Pattern not found: ${patternSlug}`);
   }
 
+  const PAGE_WIDTH = 595;
+  const MARGIN = 50;
+  const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
+
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({
         size: "A4",
-        margins: { top: 50, bottom: 50, left: 50, right: 50 },
+        margins: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN },
       });
 
       const buffers: Buffer[] = [];
 
-      doc.on("data", (chunk) => buffers.push(chunk));
+      doc.on("data", (chunk: Buffer) => buffers.push(chunk));
       doc.on("end", () => resolve(Buffer.concat(buffers)));
       doc.on("error", reject);
 
-      // Header
+      // Header – width nødvendig for align: center i PDFKit
       doc
         .fontSize(24)
         .font("Helvetica-Bold")
         .fillColor("#2d2d2d")
-        .text("Stitch of Care", 50, 50, { align: "center" });
+        .text("Stitch of Care", MARGIN, 50, { width: CONTENT_WIDTH, align: "center" });
 
       doc
         .fontSize(12)
         .font("Helvetica")
         .fillColor("#6b6b6b")
-        .text("Strikkeopskrift", 50, 80, { align: "center" });
+        .text("Strikkeopskrift", MARGIN, 80, { width: CONTENT_WIDTH, align: "center" });
 
       // Pattern Name
       doc
         .fontSize(28)
         .font("Helvetica-Bold")
         .fillColor("#2d2d2d")
-        .text(pattern.name, 50, 120, { align: "center" });
+        .text(pattern.name, MARGIN, 120, { width: CONTENT_WIDTH, align: "center" });
 
       // Pattern Info
       let yPos = 170;
@@ -56,10 +60,10 @@ export async function generatePatternPDF(patternSlug: string): Promise<Buffer> {
         .fontSize(10)
         .font("Helvetica")
         .fillColor("#6b6b6b")
-        .text(`Sværhedsgrad: ${pattern.level}`, 50, yPos);
+        .text(`Sværhedsgrad: ${pattern.level}`, MARGIN, yPos);
       yPos += 20;
 
-      doc.text(`Kategori: ${pattern.category}`, 50, yPos);
+      doc.text(`Kategori: ${pattern.category}`, MARGIN, yPos);
       yPos += 30;
 
       // Intro
@@ -67,79 +71,79 @@ export async function generatePatternPDF(patternSlug: string): Promise<Buffer> {
         .fontSize(12)
         .font("Helvetica-Bold")
         .fillColor("#2d2d2d")
-        .text("Introduktion", 50, yPos);
+        .text("Introduktion", MARGIN, yPos);
       yPos += 20;
 
       doc
         .fontSize(11)
         .font("Helvetica")
         .fillColor("#4a4a4a")
-        .text(pattern.intro, 50, yPos, {
-          width: 495,
+        .text(pattern.intro, MARGIN, yPos, {
+          width: CONTENT_WIDTH,
           align: "left",
         });
-      yPos += doc.heightOfString(pattern.intro, { width: 495 }) + 20;
+      yPos += doc.heightOfString(pattern.intro, { width: CONTENT_WIDTH }) + 20;
 
       // Construction
       doc
         .fontSize(12)
         .font("Helvetica-Bold")
         .fillColor("#2d2d2d")
-        .text("Konstruktion", 50, yPos);
+        .text("Konstruktion", MARGIN, yPos);
       yPos += 20;
 
       doc
         .fontSize(11)
         .font("Helvetica")
         .fillColor("#4a4a4a")
-        .text(pattern.construction, 50, yPos, {
-          width: 495,
+        .text(pattern.construction, MARGIN, yPos, {
+          width: CONTENT_WIDTH,
           align: "left",
         });
-      yPos += doc.heightOfString(pattern.construction, { width: 495 }) + 20;
+      yPos += doc.heightOfString(pattern.construction, { width: CONTENT_WIDTH }) + 20;
 
       // Yarn
       doc
         .fontSize(12)
         .font("Helvetica-Bold")
         .fillColor("#2d2d2d")
-        .text("Garn", 50, yPos);
+        .text("Garn", MARGIN, yPos);
       yPos += 20;
 
       doc
         .fontSize(11)
         .font("Helvetica")
         .fillColor("#4a4a4a")
-        .text(pattern.yarn, 50, yPos, {
-          width: 495,
+        .text(pattern.yarn, MARGIN, yPos, {
+          width: CONTENT_WIDTH,
           align: "left",
         });
-      yPos += doc.heightOfString(pattern.yarn, { width: 495 }) + 20;
+      yPos += doc.heightOfString(pattern.yarn, { width: CONTENT_WIDTH }) + 20;
 
       // Includes
       doc
         .fontSize(12)
         .font("Helvetica-Bold")
         .fillColor("#2d2d2d")
-        .text("Det får du", 50, yPos);
+        .text("Det får du", MARGIN, yPos);
       yPos += 20;
 
       doc
         .fontSize(11)
         .font("Helvetica")
         .fillColor("#4a4a4a")
-        .text(pattern.includes, 50, yPos, {
-          width: 495,
+        .text(pattern.includes, MARGIN, yPos, {
+          width: CONTENT_WIDTH,
           align: "left",
         });
-      yPos += doc.heightOfString(pattern.includes, { width: 495 }) + 30;
+      yPos += doc.heightOfString(pattern.includes, { width: CONTENT_WIDTH }) + 30;
 
       // Pattern Instructions (Prototype content)
       doc
         .fontSize(12)
         .font("Helvetica-Bold")
         .fillColor("#2d2d2d")
-        .text("Strikkeinstruktioner", 50, yPos);
+        .text("Strikkeinstruktioner", MARGIN, yPos);
       yPos += 20;
 
       const instructions = getPrototypeInstructions(pattern);
@@ -147,8 +151,8 @@ export async function generatePatternPDF(patternSlug: string): Promise<Buffer> {
         .fontSize(11)
         .font("Helvetica")
         .fillColor("#4a4a4a")
-        .text(instructions, 50, yPos, {
-          width: 495,
+        .text(instructions, MARGIN, yPos, {
+          width: CONTENT_WIDTH,
           align: "left",
         });
 
@@ -160,9 +164,9 @@ export async function generatePatternPDF(patternSlug: string): Promise<Buffer> {
         .fillColor("#6b6b6b")
         .text(
           `© ${new Date().getFullYear()} Stitch of Care. Alle rettigheder forbeholdes.`,
-          50,
+          MARGIN,
           pageHeight - 30,
-          { align: "center" }
+          { width: CONTENT_WIDTH, align: "center" }
         );
 
       doc.end();

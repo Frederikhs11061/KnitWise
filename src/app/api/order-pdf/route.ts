@@ -51,16 +51,25 @@ export async function GET(request: NextRequest) {
 
     const { generatePatternPDF } = await import("@/lib/pdf");
     const buffer = await generatePatternPDF(slug);
+    if (!buffer || buffer.length < 100) {
+      console.error("order-pdf: PDF buffer for slug", slug, "is empty or too small:", buffer?.length);
+      return NextResponse.json(
+        { error: "Kunne ikke generere PDF – buffer tom" },
+        { status: 500 }
+      );
+    }
     const { getPatternBySlug } = await import("@/lib/patterns");
     const pattern = getPatternBySlug(slug);
     const filename = `${pattern?.name || slug}.pdf`.replace(/\s+/g, "-");
 
-    return new NextResponse(new Uint8Array(buffer), {
+    const body = new Uint8Array(buffer.length);
+    body.set(buffer);
+    return new NextResponse(body, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"`,
-        "Content-Length": String(buffer.length),
+        "Content-Length": String(body.length),
       },
     });
   } catch (error: any) {
