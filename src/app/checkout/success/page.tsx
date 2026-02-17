@@ -18,24 +18,43 @@ function CheckoutSuccessContent() {
       clearCart();
       
       // Send email direkte fra success-siden (workaround hvis webhook ikke virker)
-      fetch("/api/send-order-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
+      // Vent lidt først - Stripe session kan være lidt langsom med at opdatere payment_status
+      const sendEmail = async (retryCount = 0) => {
+        try {
+          const res = await fetch("/api/send-order-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId }),
+          });
+          
+          const data = await res.json();
+          
           if (data.success) {
-            console.log("Order email sent:", data);
+            console.log("✅ Order email sent:", data);
           } else if (data.alreadySent) {
-            console.log("Email already sent previously");
+            console.log("ℹ️ Email already sent previously");
+          } else if (data.error === "Betaling ikke gennemført" && retryCount < 3) {
+            // Retry hvis betaling ikke er klar endnu
+            console.log(`⏳ Payment not ready yet, retrying... (${retryCount + 1}/3)`);
+            setTimeout(() => sendEmail(retryCount + 1), 2000); // Vent 2 sekunder før retry
+            return;
           } else {
-            console.error("Failed to send order email:", data);
+            console.error("❌ Failed to send order email:", data);
+            // Vis fejl til brugeren
+            alert(`Kunne ikke sende email automatisk. Fejl: ${data.error || "Ukendt fejl"}\n\nTjek browser console (F12) for detaljer.`);
           }
-        })
-        .catch((error) => {
-          console.error("Error calling send-order-email:", error);
-        });
+        } catch (error) {
+          console.error("❌ Error calling send-order-email:", error);
+          if (retryCount < 2) {
+            setTimeout(() => sendEmail(retryCount + 1), 2000);
+          } else {
+            alert("Kunne ikke kontakte serveren. Prøv at opdatere siden.");
+          }
+        }
+      };
+      
+      // Vent 1 sekund før første forsøg (giver Stripe tid til at opdatere session)
+      setTimeout(() => sendEmail(), 1000);
       
       setIsLoading(false);
     } else {

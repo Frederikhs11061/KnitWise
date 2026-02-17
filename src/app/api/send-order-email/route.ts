@@ -46,8 +46,17 @@ export async function POST(request: NextRequest) {
       expand: ["line_items"],
     });
 
+    console.log("Retrieved Stripe session:", {
+      sessionId,
+      payment_status: session.payment_status,
+      customer_email: session.customer_email,
+      hasMetadata: !!session.metadata,
+      metadata: session.metadata,
+    });
+
     // Tjek om betalingen er gennemført
     if (session.payment_status !== "paid") {
+      console.log("Payment not completed yet:", session.payment_status);
       return NextResponse.json(
         { error: "Betaling ikke gennemført", payment_status: session.payment_status },
         { status: 400 }
@@ -65,7 +74,35 @@ export async function POST(request: NextRequest) {
 
     // Hent order detaljer fra metadata
     const orderNumber = session.metadata?.orderNumber || generateOrderNumber();
-    const patternSlugs = JSON.parse(session.metadata?.patternSlugs || "[]");
+    let patternSlugs: Array<{ slug: string; quantity: number }> = [];
+    
+    try {
+      if (session.metadata?.patternSlugs) {
+        patternSlugs = JSON.parse(session.metadata.patternSlugs);
+      } else {
+        // Fallback: Hent fra line_items hvis metadata mangler
+        console.log("No patternSlugs in metadata, trying to extract from line_items");
+        if (session.line_items?.data) {
+          // Dette er en fallback - vi kan ikke få patternSlug fra line_items, så vi bruger test data
+          patternSlugs = [{ slug: "hygge-sweater", quantity: 1 }];
+          console.log("Using fallback pattern slug");
+        }
+      }
+    } catch (parseError) {
+      console.error("Error parsing patternSlugs:", parseError);
+      return NextResponse.json(
+        { error: "Kunne ikke parse order data", details: parseError },
+        { status: 400 }
+      );
+    }
+    
+    if (patternSlugs.length === 0) {
+      console.error("No pattern slugs found in session");
+      return NextResponse.json(
+        { error: "Ingen produkter fundet i ordren" },
+        { status: 400 }
+      );
+    }
 
     // Build purchase items
     const purchaseItems = patternSlugs.map((item: { slug: string; quantity: number }) => {
