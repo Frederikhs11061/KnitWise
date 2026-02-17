@@ -113,6 +113,14 @@ export async function POST(request: NextRequest) {
     // Create Stripe checkout session
     const stripe = await getStripe();
     const orderNumber = generateOrderNumber();
+    
+    console.log("Creating Stripe checkout session:", {
+      orderNumber,
+      cartItemsCount: cartItems.length,
+      userEmail: userEmail || "will be collected in Stripe form",
+      stripeMode: process.env.STRIPE_SECRET_KEY?.startsWith("sk_test_") ? "TEST" : "LIVE",
+    });
+    
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: cartItems.map((item) => ({
@@ -143,6 +151,13 @@ export async function POST(request: NextRequest) {
           }))
         ),
       },
+    });
+
+    console.log("Stripe checkout session created:", {
+      sessionId: session.id,
+      mode: session.mode,
+      customer_email: session.customer_email || "will be collected",
+      metadata: session.metadata,
     });
 
     return NextResponse.json({ sessionId: session.id, url: session.url });
