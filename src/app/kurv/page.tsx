@@ -5,23 +5,38 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import {
   getCartItemsWithDetails,
-  getCartTotal,
   updateCartItem,
   removeFromCart,
   clearCart,
   type CartItemWithDetails,
 } from "@/lib/cart";
+import {
+  calculatePriceBreakdown,
+  formatPrice,
+  type PriceBreakdown,
+} from "@/lib/pricing";
+import { getCurrentUser } from "@/lib/user";
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<CartItemWithDetails[]>([]);
-  const [total, setTotal] = useState(0);
+  const [priceBreakdown, setPriceBreakdown] = useState<PriceBreakdown>({
+    subtotal: 0,
+    vat: 0,
+    total: 0,
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const loadCart = () => {
       const items = getCartItemsWithDetails();
       setCartItems(items);
-      setTotal(getCartTotal());
+      const breakdown = calculatePriceBreakdown(
+        items.map((item) => ({
+          price: item.pattern.price,
+          quantity: item.quantity,
+        }))
+      );
+      setPriceBreakdown(breakdown);
     };
 
     loadCart();
@@ -35,24 +50,67 @@ export default function CartPage() {
     updateCartItem(slug, quantity);
     const items = getCartItemsWithDetails();
     setCartItems(items);
-    setTotal(getCartTotal());
+    const breakdown = calculatePriceBreakdown(
+      items.map((item) => ({
+        price: item.pattern.price,
+        quantity: item.quantity,
+      }))
+    );
+    setPriceBreakdown(breakdown);
   };
 
   const handleRemove = (slug: string) => {
     removeFromCart(slug);
     const items = getCartItemsWithDetails();
     setCartItems(items);
-    setTotal(getCartTotal());
+    const breakdown = calculatePriceBreakdown(
+      items.map((item) => ({
+        price: item.pattern.price,
+        quantity: item.quantity,
+      }))
+    );
+    setPriceBreakdown(breakdown);
   };
 
   const handleCheckout = async () => {
+    const user = getCurrentUser();
+    if (!user) {
+      alert("Du skal være logget ind for at købe");
+      window.location.href = "/login";
+      return;
+    }
+
     setIsLoading(true);
-    // TODO: Implement Stripe checkout
-    // This will redirect to Stripe checkout page
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cartItems,
+          userEmail: user.email,
+          userId: user.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Der opstod en fejl");
+      }
+
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("Ingen checkout URL modtaget");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert(error instanceof Error ? error.message : "Der opstod en fejl ved checkout");
       setIsLoading(false);
-      alert("Checkout kommer snart! Stripe integration bliver tilføjet.");
-    }, 500);
+    }
   };
 
   if (cartItems.length === 0) {
@@ -81,7 +139,7 @@ export default function CartPage() {
             if (confirm("Er du sikker på at du vil tømme kurven?")) {
               clearCart();
               setCartItems([]);
-              setTotal(0);
+              setPriceBreakdown({ subtotal: 0, vat: 0, total: 0 });
             }
           }}
           className="text-sm text-charcoal-500 hover:text-charcoal-700"
@@ -111,8 +169,12 @@ export default function CartPage() {
             </h2>
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-sm text-charcoal-600">
-                <span>Subtotal</span>
-                <span>{total} kr</span>
+                <span>Subtotal (ekskl. moms)</span>
+                <span>{formatPrice(priceBreakdown.subtotal)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-charcoal-600">
+                <span>Moms (25%)</span>
+                <span>{formatPrice(priceBreakdown.vat)}</span>
               </div>
               <div className="flex justify-between text-sm text-charcoal-600">
                 <span>Fragt</span>
@@ -120,8 +182,8 @@ export default function CartPage() {
               </div>
               <div className="pt-2 border-t border-beige-200">
                 <div className="flex justify-between font-semibold text-charcoal-900">
-                  <span>Total</span>
-                  <span>{total} kr</span>
+                  <span>Total (inkl. moms)</span>
+                  <span>{formatPrice(priceBreakdown.total)}</span>
                 </div>
               </div>
             </div>

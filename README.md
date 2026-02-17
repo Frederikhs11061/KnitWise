@@ -79,18 +79,21 @@ Stitch of Care bruger et skandinavisk design med:
 - Generøs spacing og læsbar typografi
 - Mobile-first responsivt design
 
-## Næste skridt
+## Setup Guides
 
-- [ ] Stripe integration for betaling
-- [ ] Email levering af PDF-opskrifter efter køb
-- [ ] Authentication integration (Clerk eller lignende)
-- [ ] Produktbilleder upload
-- [ ] SEO optimering
-- [ ] Analytics integration
+- **Stripe Setup:** Se [STRIPE_SETUP.md](./STRIPE_SETUP.md)
+- **Email Setup:** Se [EMAIL_SETUP.md](./EMAIL_SETUP.md)
+- **Webhook til Produktion:** Se [WEBHOOK_SETUP_PRODUCTION.md](./WEBHOOK_SETUP_PRODUCTION.md) eller [QUICK_START_PRODUCTION.md](./QUICK_START_PRODUCTION.md)
 
 ## Deployment
 
 Projektet er sat op til deployment på Vercel:
 1. Push til GitHub
 2. Vercel deployer automatisk fra `main` branch
-3. Custom domain kan tilføjes i Vercel dashboard
+3. **VIGTIGT:** Tilføj environment variables i Vercel:
+   - `STRIPE_SECRET_KEY`
+   - `STRIPE_PUBLISHABLE_KEY`
+   - `STRIPE_WEBHOOK_SECRET` (efter webhook opsætning)
+   - `RESEND_API_KEY` (hvis du bruger email)
+4. Opsæt webhook i Stripe dashboard (se WEBHOOK_SETUP_PRODUCTION.md)
+5. Custom domain kan tilføjes i Vercel dashboard

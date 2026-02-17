@@ -14,12 +14,27 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     
-    // TODO: Implement actual authentication
-    // For now, just simulate a delay
-    setTimeout(() => {
+    try {
+      // In production, this would call an auth API
+      // For now, we'll simulate login and save to localStorage
+      const { saveUser, generateOrderNumber } = await import("@/lib/user");
+      
+      const user = {
+        id: `user_${Date.now()}`,
+        email: email,
+        name: isLogin ? "Bruger" : name,
+        createdAt: new Date().toISOString(),
+      };
+      
+      saveUser(user);
+      
+      // Redirect to profile or home
+      window.location.href = "/profil";
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Der opstod en fejl. Prøv igen.");
       setIsLoading(false);
-      // In a real app, you'd redirect or show success message
-    }, 1000);
+    }
   };
 
   return (
