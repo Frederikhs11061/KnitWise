@@ -208,7 +208,19 @@ export const allPatterns: Pattern[] = [
 ];
 
 export const getPatternBySlug = (slug: string): Pattern | undefined => {
-  return allPatterns.find((p) => p.slug === slug);
+  if (!slug || typeof slug !== "string") return undefined;
+  const normalized = slug.trim();
+  let decoded = normalized;
+  try {
+    decoded = decodeURIComponent(normalized);
+  } catch {
+    decoded = normalized;
+  }
+  return (
+    allPatterns.find((p) => p.slug === normalized) ||
+    allPatterns.find((p) => p.slug === decoded) ||
+    allPatterns.find((p) => p.slug.toLowerCase() === decoded.toLowerCase())
+  );
 };
 
 export const getFeaturedPatterns = (): Pattern[] => {
