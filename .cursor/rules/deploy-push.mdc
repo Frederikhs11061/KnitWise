@@ -1,0 +1,10 @@
+---
+description: Deploy: altid commit og push uden at spørge brugeren
+alwaysApply: true
+---
+
+# Deploy og push
+
+- Når brugeren beder om deploy, eller når ændringer skal live: **commit og push straks**. Spørg ikke "skal jeg pushe?" eller "kør git push selv".
+- Kør: `git add` (relevante filer), `git commit -m "..."`, `git push origin main`.
+- Brug `git_write` og `network` ved push. Hvis push fejler pga. auth, sig det kort og at de kan pushe manuelt.

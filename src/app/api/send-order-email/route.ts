@@ -40,16 +40,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hent session fra Stripe
+    // Hent session fra Stripe - expand customer for at få email hvis den er der
     const stripe = await getStripe();
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ["line_items"],
+      expand: ["line_items", "customer"],
     });
 
-    console.log("Retrieved Stripe session:", {
+    // Log alle mulige email-steder for debugging
+    const sessionAny = session as any;
+    console.log("Retrieved Stripe session - email locations:", {
       sessionId,
       payment_status: session.payment_status,
       customer_email: session.customer_email,
+      customer_details: sessionAny.customer_details,
+      customer_details_email: sessionAny.customer_details?.email,
+      customer: session.customer,
+      customer_email_from_customer: typeof session.customer === 'object' ? (session.customer as any)?.email : null,
       hasMetadata: !!session.metadata,
       metadata: session.metadata,
     });
@@ -115,8 +121,15 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    // Email kan være i customer_email (gammel) eller customer_details.email (ny Stripe API)
-    const email = session.customer_email || (session as any).customer_details?.email;
+    // Email kan være i flere steder - tjek dem alle i prioritetsrækkefølge:
+    // 1. customer_email (hvis sat ved oprettelse)
+    // 2. customer_details.email (hvis indsamlet i checkout-formularen)
+    // 3. customer.email (hvis customer objektet er expanderet)
+    const sessionAny = session as any;
+    const email = 
+      session.customer_email || 
+      sessionAny.customer_details?.email ||
+      (typeof session.customer === 'object' && session.customer ? (session.customer as any).email : null);
 
     // Send email hvis email findes
     if (email) {
@@ -153,12 +166,26 @@ export async function POST(request: NextRequest) {
         orderNumber,
       });
     } else {
-      console.error("No email on session:", {
+      // Log alt hvad vi har fundet for debugging
+      const sessionAny = session as any;
+      console.error("No email found on session - all checked locations:", {
         customer_email: session.customer_email,
-        customer_details: (session as any).customer_details,
+        customer_details: sessionAny.customer_details,
+        customer_details_email: sessionAny.customer_details?.email,
+        customer: session.customer,
+        customer_email_from_customer: typeof session.customer === 'object' ? (session.customer as any)?.email : null,
+        full_session_keys: Object.keys(session).slice(0, 20), // Første 20 keys for debugging
       });
       return NextResponse.json(
-        { error: "Ingen email på session (tjek customer_details)", sessionId },
+        { 
+          error: "Ingen email på session", 
+          sessionId,
+          debug: {
+            customer_email: session.customer_email,
+            customer_details: sessionAny.customer_details,
+            customer: session.customer,
+          }
+        },
         { status: 400 }
       );
     }

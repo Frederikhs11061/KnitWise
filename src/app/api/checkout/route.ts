@@ -141,6 +141,8 @@ export async function POST(request: NextRequest) {
       // Only set customer_email if provided (logged in user)
       // Otherwise Stripe will collect email in checkout form
       ...(userEmail && { customer_email: userEmail }),
+      // Altid opret customer så email gemmes korrekt i customer_details
+      customer_creation: "always",
       metadata: {
         userId,
         orderNumber,
