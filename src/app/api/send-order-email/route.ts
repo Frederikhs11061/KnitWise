@@ -174,14 +174,34 @@ export async function POST(request: NextRequest) {
           } : null,
         });
       } catch (emailError: any) {
+        const msg = emailError?.message || "";
+        const isResendTestLimit =
+          msg.includes("only send") ||
+          msg.includes("your own email") ||
+          msg.includes("verify a domain") ||
+          msg.includes("validation_error");
+
         console.error("❌ Fejl ved afsendelse af email:", emailError);
+
+        if (isResendTestLimit) {
+          return NextResponse.json({
+            success: false,
+            resendTestLimit: true,
+            error: "Email kun til egen adresse i test-tilstand",
+            email,
+            orderNumber,
+            message:
+              "Din betaling er gennemført. I test-tilstand kan vi kun sende mail til butikkens egen email. Verificer domæne i Resend for at sende til alle kunder.",
+          });
+        }
+
         return NextResponse.json(
           {
             success: false,
             error: "Kunne ikke sende email",
             email,
             orderNumber,
-            details: emailError?.message || "Ukendt fejl",
+            details: msg || "Ukendt fejl",
           },
           { status: 500 }
         );
