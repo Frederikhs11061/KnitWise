@@ -29,8 +29,23 @@ interface CheckoutRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error("STRIPE_SECRET_KEY is not configured");
+      return NextResponse.json(
+        { error: "Stripe er ikke konfigureret. Tjek environment variables." },
+        { status: 500 }
+      );
+    }
+
     const body: CheckoutRequest = await request.json();
     const { cartItems, userEmail, userId } = body;
+
+    console.log("Checkout request received:", {
+      cartItemsCount: cartItems?.length,
+      hasUserEmail: !!userEmail,
+      userId,
+    });
 
     // Email is optional - Stripe will collect it in checkout if not provided
 
@@ -39,6 +54,17 @@ export async function POST(request: NextRequest) {
         { error: "Din kurv er tom" },
         { status: 400 }
       );
+    }
+
+    // Validate cartItems structure
+    for (const item of cartItems) {
+      if (!item.pattern || !item.pattern.name || !item.pattern.price) {
+        console.error("Invalid cart item:", item);
+        return NextResponse.json(
+          { error: "Ugyldig kurv data" },
+          { status: 400 }
+        );
+      }
     }
 
     // Create Stripe checkout session
@@ -78,12 +104,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ sessionId: session.id, url: session.url });
   } catch (error: any) {
     console.error("Stripe checkout error:", error);
-    // Return more detailed error in development
-    const errorMessage = process.env.NODE_ENV === "development" 
-      ? error.message || "Der opstod en fejl ved oprettelse af checkout"
-      : "Der opstod en fejl ved oprettelse af checkout";
+    console.error("Error details:", {
+      message: error.message,
+      type: error.type,
+      code: error.code,
+      stack: error.stack,
+    });
+    
+    // Return detailed error for debugging
+    const errorMessage = error.message || "Der opstod en fejl ved oprettelse af checkout";
     return NextResponse.json(
-      { error: errorMessage, details: process.env.NODE_ENV === "development" ? error.stack : undefined },
+      { 
+        error: errorMessage,
+        details: process.env.NODE_ENV === "development" ? {
+          type: error.type,
+          code: error.code,
+          message: error.message,
+        } : undefined,
+      },
       { status: 500 }
     );
   }
