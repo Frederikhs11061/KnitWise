@@ -88,7 +88,7 @@ export default function AdvancedYarnSubstitution() {
                 onChange={(e) => setPatternSkeins(e.target.value)}
               />
               <Input
-                label="Opkrævet masketal (masker pr. 10 cm)"
+                label="Opskriftens strikkefasthed (masker pr. 10 cm)"
                 type="number"
                 min="1"
                 step="0.5"
@@ -123,7 +123,7 @@ export default function AdvancedYarnSubstitution() {
                 onChange={(e) => setYourMetersPerSkein(e.target.value)}
               />
               <Input
-                label="Dit masketal (masker pr. 10 cm)"
+                label="Din strikkefasthed (masker pr. 10 cm)"
                 type="number"
                 min="1"
                 step="0.5"
