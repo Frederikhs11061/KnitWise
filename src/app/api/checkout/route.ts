@@ -23,7 +23,7 @@ interface CheckoutRequest {
       price: number;
     };
   }>;
-  userEmail: string;
+  userEmail?: string; // Optional - Stripe will collect if not provided
   userId: string;
 }
 
@@ -32,12 +32,7 @@ export async function POST(request: NextRequest) {
     const body: CheckoutRequest = await request.json();
     const { cartItems, userEmail, userId } = body;
 
-    if (!userEmail) {
-      return NextResponse.json(
-        { error: "Email er påkrævet" },
-        { status: 400 }
-      );
-    }
+    // Email is optional - Stripe will collect it in checkout if not provided
 
     if (!cartItems || cartItems.length === 0) {
       return NextResponse.json(
@@ -65,7 +60,9 @@ export async function POST(request: NextRequest) {
       mode: "payment",
       success_url: `${request.headers.get("origin")}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.headers.get("origin")}/kurv`,
-      customer_email: userEmail,
+      // Only set customer_email if provided (logged in user)
+      // Otherwise Stripe will collect email in checkout form
+      ...(userEmail && { customer_email: userEmail }),
       metadata: {
         userId,
         orderNumber,
@@ -79,10 +76,14 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ sessionId: session.id, url: session.url });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Stripe checkout error:", error);
+    // Return more detailed error in development
+    const errorMessage = process.env.NODE_ENV === "development" 
+      ? error.message || "Der opstod en fejl ved oprettelse af checkout"
+      : "Der opstod en fejl ved oprettelse af checkout";
     return NextResponse.json(
-      { error: "Der opstod en fejl ved oprettelse af checkout" },
+      { error: errorMessage, details: process.env.NODE_ENV === "development" ? error.stack : undefined },
       { status: 500 }
     );
   }

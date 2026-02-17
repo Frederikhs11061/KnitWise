@@ -17,11 +17,6 @@ import {
 } from "@/lib/pricing";
 import { getCurrentUser } from "@/lib/user";
 
-// Simple email validation
-function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<CartItemWithDetails[]>([]);
   const [priceBreakdown, setPriceBreakdown] = useState<PriceBreakdown>({
@@ -80,20 +75,8 @@ export default function CartPage() {
   const handleCheckout = async () => {
     setIsLoading(true);
     try {
-      // Get email from user if logged in, otherwise prompt for email
+      // Get user if logged in (optional)
       const user = getCurrentUser();
-      let customerEmail = user?.email;
-      
-      if (!customerEmail) {
-        // Prompt for email if not logged in
-        const email = prompt("Indtast din email for at modtage opskrifterne:");
-        if (!email || !isValidEmail(email)) {
-          alert("Du skal indtaste en gyldig email-adresse");
-          setIsLoading(false);
-          return;
-        }
-        customerEmail = email;
-      }
 
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -102,7 +85,7 @@ export default function CartPage() {
         },
         body: JSON.stringify({
           cartItems,
-          userEmail: customerEmail,
+          userEmail: user?.email || undefined, // Optional - Stripe will collect email
           userId: user?.id || `guest_${Date.now()}`,
         }),
       });
