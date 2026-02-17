@@ -44,13 +44,25 @@ export async function POST(request: NextRequest) {
     console.log("Email:", email);
     console.log("Order:", orderNumber);
     console.log("Items:", purchaseItems);
+    console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
 
     // Send email (samme som webhook gør)
-    await sendPatternEmail({
-      email,
-      orderNumber,
-      items: purchaseItems,
-    });
+    try {
+      await sendPatternEmail({
+        email,
+        orderNumber,
+        items: purchaseItems,
+      });
+      console.log("sendPatternEmail completed without error");
+    } catch (emailError: any) {
+      console.error("sendPatternEmail threw error:", emailError);
+      return NextResponse.json({
+        success: false,
+        message: "sendPatternEmail fejlede",
+        error: emailError?.message,
+        stack: emailError?.stack,
+      }, { status: 500 });
+    }
 
     return NextResponse.json({
       success: true,
@@ -58,6 +70,7 @@ export async function POST(request: NextRequest) {
       email,
       orderNumber,
       pattern: pattern.name,
+      note: "Tjek Vercel logs for /api/test-webhook hvis du ikke får mail",
     });
   } catch (error: any) {
     console.error("Test webhook error:", error);
