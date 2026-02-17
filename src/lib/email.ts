@@ -194,14 +194,19 @@ export async function sendPatternEmail(data: EmailData) {
 
     let attachments: { filename: string; content: string }[] = [];
     try {
+      console.log("📄 Generating PDFs for patterns:", patternSlugs);
       const { generatePatternPDFs } = await import("./pdf");
       const pdfs = await generatePatternPDFs(patternSlugs);
+      console.log(`✅ Generated ${pdfs.length} PDFs successfully`);
       attachments = pdfs.map((pdf) => ({
         filename: pdf.filename,
         content: pdf.buffer.toString("base64"),
       }));
+      console.log(`📎 Attaching ${attachments.length} PDFs to email`);
     } catch (pdfError: any) {
-      console.error("PDF generation failed, sending email without attachments:", pdfError?.message);
+      console.error("❌ PDF generation failed, sending email without attachments:", pdfError?.message);
+      console.error("PDF error details:", pdfError);
+      // Don't throw - send email without PDFs rather than failing completely
     }
 
     // Send email (with or without PDF attachments)

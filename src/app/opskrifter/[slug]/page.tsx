@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import type { FC } from "react";
 import { getPatternBySlug } from "@/lib/patterns";
 import AddToCartButton from "@/components/AddToCartButton";
 
@@ -20,7 +19,7 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
   };
 }
 
-const PatternPage: FC<{ params: Params }> = ({ params }) => {
+export default function PatternPage({ params }: { params: Params }) {
   const pattern = getPatternBySlug(params.slug);
 
   if (!pattern) {
@@ -115,7 +114,4 @@ const PatternPage: FC<{ params: Params }> = ({ params }) => {
       </p>
     </div>
   );
-};
-
-
-export default PatternPage;
+}
