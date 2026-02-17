@@ -8,7 +8,7 @@ async function getStripe() {
   }
   const Stripe = (await import("stripe")).default;
   return new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2024-12-18.acacia",
+    apiVersion: "2025-02-24.acacia",
   });
 }
 
@@ -32,10 +32,10 @@ export async function POST(request: NextRequest) {
     const body: CheckoutRequest = await request.json();
     const { cartItems, userEmail, userId } = body;
 
-    if (!userEmail || !userId) {
+    if (!userEmail) {
       return NextResponse.json(
-        { error: "Du skal være logget ind" },
-        { status: 401 }
+        { error: "Email er påkrævet" },
+        { status: 400 }
       );
     }
 

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { clearCart } from "@/lib/cart";
 import { getPurchaseHistory } from "@/lib/user";
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -57,18 +57,36 @@ export default function CheckoutSuccessPage() {
 
       <div className="flex flex-col sm:flex-row gap-3">
         <Link
-          href="/profil"
-          className="flex-1 px-6 py-3 rounded-xl bg-rose-400 text-white font-semibold hover:bg-rose-500 transition-colors text-center"
-        >
-          Se købshistorik
-        </Link>
-        <Link
           href="/opskrifter"
-          className="flex-1 px-6 py-3 rounded-xl border border-beige-200 text-charcoal-700 font-semibold hover:bg-cream-50 transition-colors text-center"
+          className="flex-1 px-6 py-3 rounded-xl bg-rose-400 text-white font-semibold hover:bg-rose-500 transition-colors text-center"
         >
           Se flere opskrifter
         </Link>
+        <Link
+          href="/profil"
+          className="flex-1 px-6 py-3 rounded-xl border border-beige-200 text-charcoal-700 font-semibold hover:bg-cream-50 transition-colors text-center"
+        >
+          Se købshistorik
+        </Link>
+      </div>
+
+      <div className="mt-6 p-4 rounded-xl bg-sage-50 border border-sage-200">
+        <p className="text-sm text-charcoal-700">
+          <strong>Tip:</strong> Opret en konto for at se alle dine køb på ét sted og gemme favoritter.
+        </p>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-2xl mx-auto px-4 py-12 text-center">
+        <p className="text-charcoal-600">Behandler din betaling...</p>
+      </div>
+    }>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }

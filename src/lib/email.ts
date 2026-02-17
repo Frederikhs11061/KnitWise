@@ -26,8 +26,7 @@ export async function sendPatternEmail(data: EmailData) {
 
   try {
     // Dynamic import to avoid build errors if Resend is not installed
-    const resendModule = await import("resend");
-    const Resend = resendModule.default || resendModule.Resend;
+    const { Resend } = await import("resend");
     const resendClient = new Resend(process.env.RESEND_API_KEY);
 
     // Build email content
