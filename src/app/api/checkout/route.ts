@@ -41,18 +41,35 @@ export async function POST(request: NextRequest) {
   try {
     // Check if Stripe is configured - with detailed logging
     const secretKey = process.env.STRIPE_SECRET_KEY;
-    console.log("Checking STRIPE_SECRET_KEY:", {
-      exists: !!secretKey,
-      length: secretKey?.length,
-      startsWith: secretKey?.substring(0, 5),
-      allStripeVars: Object.keys(process.env).filter(k => k.includes("STRIPE")),
+    
+    // Log all environment variables that contain STRIPE (for debugging)
+    const stripeEnvVars = Object.keys(process.env)
+      .filter(k => k.toUpperCase().includes("STRIPE"))
+      .reduce((acc, key) => {
+        acc[key] = process.env[key] ? `${process.env[key]?.substring(0, 10)}...` : "undefined";
+        return acc;
+      }, {} as Record<string, string>);
+    
+    console.log("Environment check:", {
+      hasSecretKey: !!secretKey,
+      secretKeyLength: secretKey?.length,
+      secretKeyPrefix: secretKey?.substring(0, 7),
+      allStripeVars: stripeEnvVars,
+      nodeEnv: process.env.NODE_ENV,
     });
     
     if (!secretKey) {
-      console.error("STRIPE_SECRET_KEY is not configured");
-      console.error("Available environment variables:", Object.keys(process.env).filter(k => k.includes("STRIPE")));
+      const errorDetails = {
+        message: "STRIPE_SECRET_KEY is not configured",
+        availableStripeVars: Object.keys(process.env).filter(k => k.toUpperCase().includes("STRIPE")),
+        nodeEnv: process.env.NODE_ENV,
+      };
+      console.error("Stripe configuration error:", errorDetails);
       return NextResponse.json(
-        { error: "Stripe er ikke konfigureret. Tjek environment variables og redeploy." },
+        { 
+          error: "Stripe er ikke konfigureret. Tjek environment variables og redeploy.",
+          debug: process.env.NODE_ENV === "development" ? errorDetails : undefined,
+        },
         { status: 500 }
       );
     }
