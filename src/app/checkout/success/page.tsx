@@ -10,12 +10,25 @@ function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
   const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
     if (sessionId) {
       // Clear cart after successful payment
       clearCart();
+      
+      // Debug: Tjek session først
+      const checkSession = async () => {
+        try {
+          const res = await fetch(`/api/check-session?session_id=${sessionId}`);
+          const sessionData = await res.json();
+          setDebugInfo(sessionData);
+          console.log("📋 Session data:", sessionData);
+        } catch (error) {
+          console.error("Error checking session:", error);
+        }
+      };
       
       // Send email direkte fra success-siden (workaround hvis webhook ikke virker)
       // Vent lidt først - Stripe session kan være lidt langsom med at opdatere payment_status
@@ -52,6 +65,9 @@ function CheckoutSuccessContent() {
           }
         }
       };
+      
+      // Tjek session først (for debugging)
+      checkSession();
       
       // Vent 1 sekund før første forsøg (giver Stripe tid til at opdatere session)
       setTimeout(() => sendEmail(), 1000);
@@ -115,6 +131,16 @@ function CheckoutSuccessContent() {
           <strong>Tip:</strong> Opret en konto for at se alle dine køb på ét sted og gemme favoritter.
         </p>
       </div>
+
+      {/* Debug info (kun i development) */}
+      {process.env.NODE_ENV === "development" && debugInfo && (
+        <div className="mt-6 p-4 rounded-xl bg-yellow-50 border border-yellow-200">
+          <h3 className="font-semibold mb-2">Debug Info:</h3>
+          <pre className="text-xs overflow-auto">
+            {JSON.stringify(debugInfo, null, 2)}
+          </pre>
+        </div>
+      )}
     </div>
   );
 }
