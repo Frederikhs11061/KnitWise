@@ -78,13 +78,25 @@ export default function CartPage() {
       // Get user if logged in (optional)
       const user = getCurrentUser();
 
+      // Map cartItems to the format expected by the API
+      const checkoutItems = cartItems.map((item) => ({
+        patternSlug: item.patternSlug,
+        quantity: item.quantity,
+        pattern: {
+          name: item.pattern.name,
+          level: item.pattern.level,
+          category: item.pattern.category,
+          price: item.pattern.price,
+        },
+      }));
+
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          cartItems,
+          cartItems: checkoutItems,
           userEmail: user?.email || undefined, // Optional - Stripe will collect email
           userId: user?.id || `guest_${Date.now()}`,
         }),
