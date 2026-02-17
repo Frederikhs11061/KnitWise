@@ -68,7 +68,7 @@ export default function AdvancedYarnSubstitution() {
             <h3 className="text-sm font-semibold text-charcoal-700 mb-4 uppercase tracking-wide">
               Opskriftens garn
             </h3>
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
               <Input
                 label="Meter pr. nøgle"
                 type="number"
@@ -112,7 +112,7 @@ export default function AdvancedYarnSubstitution() {
             <h3 className="text-sm font-semibold text-charcoal-700 mb-4 uppercase tracking-wide">
               Dit alternativ
             </h3>
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
               <Input
                 label="Meter pr. nøgle"
                 type="number"
