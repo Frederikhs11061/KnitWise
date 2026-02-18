@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/profil";
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +34,7 @@ export default function LoginPage() {
           return;
         }
       } else {
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: { data: { full_name: name } },
@@ -43,10 +44,14 @@ export default function LoginPage() {
           setIsLoading(false);
           return;
         }
+        if (signUpData?.user && !signUpData.session) {
+          setError("Tjek din email – vi har sendt et bekræftelseslink. Klik på det og log ind derefter.");
+          setIsLoading(false);
+          return;
+        }
       }
 
-      router.push("/profil");
-      router.refresh();
+      window.location.href = redirectTo.startsWith("/") ? redirectTo : "/profil";
     } catch (err) {
       console.error("Auth error:", err);
       setError("Der opstod en fejl. Prøv igen.");

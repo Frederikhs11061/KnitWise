@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getPatternBySlug } from "@/lib/patterns";
 import { formatPrice } from "@/lib/pricing";
 
@@ -28,12 +28,23 @@ type Address = {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
   const [user, setUser] = useState<User | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"purchases" | "saved" | "addresses" | "profile">("purchases");
+  const [activeTab, setActiveTab] = useState<"purchases" | "saved" | "addresses" | "profile">(
+    tabParam === "saved" || tabParam === "ønskeliste" ? "saved" : "purchases"
+  );
+
+  useEffect(() => {
+    if (tabParam === "saved" || tabParam === "ønskeliste") setActiveTab("saved");
+    if (tabParam === "addresses") setActiveTab("addresses");
+    if (tabParam === "profile") setActiveTab("profile");
+    if (tabParam === "purchases") setActiveTab("purchases");
+  }, [tabParam]);
 
   useEffect(() => {
     Promise.all([

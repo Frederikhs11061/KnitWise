@@ -64,7 +64,7 @@ export default function PatternPageContent() {
       <div className="grid gap-8 lg:grid-cols-2 mb-8">
         <div className="relative w-full h-96 rounded-2xl overflow-hidden bg-gradient-to-br from-rose-100 to-sage-100">
           <div className="absolute top-4 right-4 z-10">
-            <WishlistHeart patternSlug={pattern.slug} />
+            <WishlistHeart patternSlug={pattern.slug} variant="icon" />
           </div>
           <Image
             src={pattern.image}

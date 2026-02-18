@@ -1,11 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/user";
+import { useEffect, useState } from "react";
 import CartButton from "./CartButton";
 
 export default function Navigation() {
-  const user = getCurrentUser();
+  const [user, setUser] = useState<{ id: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/user", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => setUser(data?.user ?? null))
+      .catch(() => setUser(null));
+  }, []);
 
   return (
     <nav className="flex items-center gap-6 text-sm font-medium text-charcoal-700">
@@ -34,12 +41,20 @@ export default function Navigation() {
         Om os
       </Link>
       {user ? (
-        <Link
-          href="/profil"
-          className="px-3 py-1.5 rounded-full border border-sage-300 hover:border-sage-400 hover:bg-sage-50 transition-colors"
-        >
-          Min profil
-        </Link>
+        <>
+          <Link
+            href="/profil?tab=saved"
+            className="hover:text-forest-800 transition-colors"
+          >
+            Ønskeliste
+          </Link>
+          <Link
+            href="/profil"
+            className="px-3 py-1.5 rounded-full border border-sage-300 hover:border-sage-400 hover:bg-sage-50 transition-colors"
+          >
+            Min profil
+          </Link>
+        </>
       ) : (
         <Link
           href="/login"

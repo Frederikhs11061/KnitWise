@@ -194,9 +194,6 @@ function PatternCard({ pattern }: { pattern: Pattern }) {
     <article className="flex flex-col rounded-2xl border border-beige-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Image */}
       <div className="relative w-full h-64 bg-gradient-to-br from-rose-100 to-sage-100">
-        <div className="absolute top-2 right-2 z-10">
-          <WishlistHeart patternSlug={pattern.slug} />
-        </div>
         <Image
           src={pattern.image}
           alt={pattern.name}
@@ -237,7 +234,8 @@ function PatternCard({ pattern }: { pattern: Pattern }) {
           <p className="text-lg font-semibold text-charcoal-900">
             {pattern.price} kr
           </p>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <WishlistHeart patternSlug={pattern.slug} variant="button" />
             <Link
               href={`/opskrifter/${pattern.slug}`}
               className="text-xs px-3 py-1.5 rounded-full border border-beige-200 text-charcoal-800 hover:border-forest-800 hover:text-forest-800 transition-colors"
