@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 // Dynamic import to avoid build errors if Stripe is not installed
 async function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {

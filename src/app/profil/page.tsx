@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getPatternBySlug } from "@/lib/patterns";
 import { formatPrice } from "@/lib/pricing";
@@ -26,7 +26,7 @@ type Address = {
   country: string;
 };
 
-export default function ProfilePage() {
+function ProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
@@ -122,6 +122,14 @@ export default function ProfilePage() {
       )}
       {activeTab === "profile" && <ProfileTab user={user} />}
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<div className="max-w-6xl mx-auto px-4 py-12"><p className="text-charcoal-600">Indlæser...</p></div>}>
+      <ProfileContent />
+    </Suspense>
   );
 }
 
