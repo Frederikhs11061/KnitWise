@@ -1,19 +1,14 @@
 /**
- * Supabase client til brug i browser (Client Components).
- * Brug createServerSupabase() i Server Components og API routes.
+ * Supabase browser client til Client Components.
+ * Bruger cookies til session (via @supabase/ssr).
  */
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
-
-function getClient(): SupabaseClient {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      "Supabase: Sæt NEXT_PUBLIC_SUPABASE_URL og NEXT_PUBLIC_SUPABASE_ANON_KEY i .env.local og Vercel."
-    );
+export function createClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    throw new Error("Supabase: NEXT_PUBLIC_SUPABASE_URL og NEXT_PUBLIC_SUPABASE_ANON_KEY skal være sat.");
   }
-  return createClient(supabaseUrl, supabaseAnonKey);
+  return createBrowserClient(url, key);
 }
-
-export const supabase = getClient();

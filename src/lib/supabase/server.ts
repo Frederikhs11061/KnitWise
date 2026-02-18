@@ -1,29 +1,43 @@
 /**
- * Supabase client til brug på serveren (Server Components, API routes, server actions).
- * - createServerSupabase() bruger anon key (til almindelige læs/skriv med RLS).
- * - createServiceRoleSupabase() bruger service role key (kun server, bypass RLS – til admin).
+ * Supabase server client til Server Components, API routes og Server Actions.
+ * Bruger cookies så session er tilgængelig på serveren.
  */
-import { createClient } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-
-export function createServerSupabase() {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      "Supabase: Sæt NEXT_PUBLIC_SUPABASE_URL og NEXT_PUBLIC_SUPABASE_ANON_KEY i .env.local og Vercel."
-    );
+export async function createClient() {
+  const cookieStore = await cookies();
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    throw new Error("Supabase: NEXT_PUBLIC_SUPABASE_URL og NEXT_PUBLIC_SUPABASE_ANON_KEY skal være sat.");
   }
-  return createClient(supabaseUrl, supabaseAnonKey);
+
+  return createServerClient(url, key, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        } catch {
+          // Kan ske i Server Component – middleware opdaterer session
+        }
+      },
+    },
+  });
 }
 
-/** Kun til server. Bypasser RLS – brug til admin eller backend-jobs. */
-export function createServiceRoleSupabase() {
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
-    throw new Error(
-      "Supabase: Sæt NEXT_PUBLIC_SUPABASE_URL og SUPABASE_SERVICE_ROLE_KEY for service role client."
-    );
+/** Service role client (kun server, bypass RLS). */
+export async function createServiceRoleClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error("Supabase: SUPABASE_SERVICE_ROLE_KEY skal være sat for service role.");
   }
-  return createClient(supabaseUrl, supabaseServiceRoleKey);
+  const { createClient } = await import("@supabase/supabase-js");
+  return createClient(url, key);
 }

@@ -9,6 +9,8 @@ import {
   type PatternLevel,
   type PatternCategory,
 } from "@/lib/patterns";
+import WishlistHeart from "@/components/WishlistHeart";
+import AddToCartButton from "@/components/AddToCartButton";
 
 const levels: PatternLevel[] = ["Begynder", "Let øvet", "Øvet", "Avanceret"];
 const categories: PatternCategory[] = ["Sweater", "Cardigan", "Tilbehør", "Sæt"];
@@ -192,6 +194,9 @@ function PatternCard({ pattern }: { pattern: Pattern }) {
     <article className="flex flex-col rounded-2xl border border-beige-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Image */}
       <div className="relative w-full h-64 bg-gradient-to-br from-rose-100 to-sage-100">
+        <div className="absolute top-2 right-2 z-10">
+          <WishlistHeart patternSlug={pattern.slug} />
+        </div>
         <Image
           src={pattern.image}
           alt={pattern.name}
@@ -246,5 +251,3 @@ function PatternCard({ pattern }: { pattern: Pattern }) {
     </article>
   );
 }
-
-import AddToCartButton from "@/components/AddToCartButton";

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createServerSupabase } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/supabase-health
@@ -7,8 +7,7 @@ import { createServerSupabase } from "@/lib/supabase/server";
  */
 export async function GET() {
   try {
-    const supabase = createServerSupabase();
-    // Simpel forbindelsestest (kræver ingen tabeller)
+    const supabase = await createClient();
     const { data, error } = await supabase.auth.getSession();
     if (error) {
       const hint =

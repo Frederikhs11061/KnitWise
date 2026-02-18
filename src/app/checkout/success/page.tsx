@@ -29,7 +29,21 @@ function CheckoutSuccessContent() {
         }
       };
       checkSession();
-      
+
+      // Gem ordre i Supabase hvis bruger er logget ind
+      fetch("/api/user")
+        .then((r) => r.json())
+        .then((data) => {
+          if (data?.user?.id) {
+            return fetch("/api/orders", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ sessionId }),
+            });
+          }
+        })
+        .catch(() => {});
+
       // Send email direkte fra success-siden (workaround hvis webhook ikke virker)
       // Vent lidt først - Stripe session kan være lidt langsom med at opdatere payment_status
       const sendEmail = async (retryCount = 0) => {
