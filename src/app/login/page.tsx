@@ -51,6 +51,7 @@ export default function LoginPage() {
         }
       }
 
+      await new Promise((r) => setTimeout(r, 200));
       window.location.href = redirectTo.startsWith("/") ? redirectTo : "/profil";
     } catch (err) {
       console.error("Auth error:", err);

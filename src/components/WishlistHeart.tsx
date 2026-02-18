@@ -1,29 +1,68 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { getLocalWishlist, setLocalWishlist, toggleLocalWishlist } from "@/lib/wishlist-local";
 
 type Props = { patternSlug: string; variant?: "button" | "icon" };
 
 export default function WishlistHeart({ patternSlug, variant = "button" }: Props) {
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
-    fetch("/api/wishlist", { credentials: "include" })
-      .then((res) => res.json())
+    let cancelled = false;
+
+    fetch("/api/user", { credentials: "include" })
+      .then((r) => r.json())
       .then((data) => {
-        if (Array.isArray(data?.wishlist)) {
-          setIsInWishlist(data.wishlist.includes(patternSlug));
+        if (cancelled) return;
+        const hasUser = !!data?.user;
+        setIsLoggedIn(hasUser);
+
+        if (hasUser) {
+          return fetch("/api/wishlist", { credentials: "include" })
+            .then((res) => res.json())
+            .then((d) => {
+              if (cancelled) return;
+              if (Array.isArray(d?.wishlist)) {
+                setIsInWishlist(d.wishlist.includes(patternSlug));
+              }
+            });
         }
+        const local = getLocalWishlist();
+        setIsInWishlist(local.includes(patternSlug));
       })
-      .catch(() => {});
-  }, [patternSlug]);
+      .catch(() => {
+        if (!cancelled) {
+          setIsLoggedIn(false);
+          setIsInWishlist(getLocalWishlist().includes(patternSlug));
+        }
+      });
+
+    const onUpdate = () => {
+      if (isLoggedIn === false) {
+        setIsInWishlist(getLocalWishlist().includes(patternSlug));
+      }
+    };
+    window.addEventListener("wishlist-updated", onUpdate);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("wishlist-updated", onUpdate);
+    };
+  }, [patternSlug, isLoggedIn]);
 
   const toggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (loading) return;
+
+    if (isLoggedIn === false) {
+      const nowIn = toggleLocalWishlist(patternSlug);
+      setIsInWishlist(nowIn);
+      return;
+    }
+
     setLoading(true);
     try {
       if (isInWishlist) {
@@ -32,7 +71,10 @@ export default function WishlistHeart({ patternSlug, variant = "button" }: Props
           { method: "DELETE", credentials: "include" }
         );
         if (res.status === 401) {
-          window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+          const nowIn = toggleLocalWishlist(patternSlug);
+          setIsInWishlist(nowIn);
+          setIsLoggedIn(false);
+          setLoading(false);
           return;
         }
         if (res.ok) setIsInWishlist(false);
@@ -44,7 +86,10 @@ export default function WishlistHeart({ patternSlug, variant = "button" }: Props
           body: JSON.stringify({ slug: patternSlug }),
         });
         if (res.status === 401) {
-          window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+          const nowIn = toggleLocalWishlist(patternSlug);
+          setIsInWishlist(nowIn);
+          setIsLoggedIn(false);
+          setLoading(false);
           return;
         }
         if (res.ok) setIsInWishlist(true);
@@ -83,17 +128,5 @@ export default function WishlistHeart({ patternSlug, variant = "button" }: Props
       {icon}
       <span>{isInWishlist ? "I ønskeliste" : "Ønskeliste"}</span>
     </button>
-  );
-}
-
-export function WishlistLink() {
-  return (
-    <Link
-      href="/profil"
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-beige-200 text-charcoal-800 hover:border-rose-300 hover:text-rose-600 transition-colors text-xs font-medium"
-    >
-      <span>🤍</span>
-      <span>Se ønskeliste</span>
-    </Link>
   );
 }

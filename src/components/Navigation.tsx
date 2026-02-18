@@ -40,21 +40,19 @@ export default function Navigation() {
       >
         Om os
       </Link>
+      <Link
+        href="/ønskeliste"
+        className="hover:text-forest-800 transition-colors"
+      >
+        Ønskeliste
+      </Link>
       {user ? (
-        <>
-          <Link
-            href="/profil?tab=saved"
-            className="hover:text-forest-800 transition-colors"
-          >
-            Ønskeliste
-          </Link>
-          <Link
-            href="/profil"
-            className="px-3 py-1.5 rounded-full border border-sage-300 hover:border-sage-400 hover:bg-sage-50 transition-colors"
-          >
-            Min profil
-          </Link>
-        </>
+        <Link
+          href="/profil"
+          className="px-3 py-1.5 rounded-full border border-sage-300 hover:border-sage-400 hover:bg-sage-50 transition-colors"
+        >
+          Min profil
+        </Link>
       ) : (
         <Link
           href="/login"
