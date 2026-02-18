@@ -15,7 +15,12 @@ export async function GET() {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  return NextResponse.json({ orders: data || [] });
+  // Normaliser total til DKK (ældre rækker kan være gemt i øre fra Stripe)
+  const orders = (data || []).map((o: { total?: number; [k: string]: unknown }) => ({
+    ...o,
+    total: o.total != null && o.total > 1000 && Number.isInteger(o.total) ? o.total / 100 : o.total,
+  }));
+  return NextResponse.json({ orders });
 }
 
 /** Gem ordre i Supabase når bruger er logget ind (kaldes fra checkout success). */
@@ -54,14 +59,16 @@ export async function POST(request: NextRequest) {
       });
     } catch (_) {}
   }
-  const total = session.amount_total ?? 0;
+  // Stripe amount_total er i øre (smallest unit) – gem som kroner (DKK)
+  const totalCents = session.amount_total ?? 0;
+  const totalDkk = Number(totalCents) / 100;
 
   const { error: insertError } = await supabase.from("orders").insert({
     user_id: user.id,
     stripe_session_id: sessionId,
     order_number: orderNumber,
     email,
-    total: Number(total),
+    total: totalDkk,
     status: "completed",
     items,
   });
