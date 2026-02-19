@@ -40,16 +40,11 @@ export default function RootLayout({
           <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-6">
             <Link
               href="/"
-              className="flex items-center gap-3 text-forest-800 hover:text-forest-700 transition-colors"
+              className="flex items-center gap-2 text-charcoal-900 hover:text-[hsl(345_35%_48%)] transition-colors"
             >
-              <Image
-                src="/assets/logo.png"
-                alt="Stitch of Care logo"
-                width={120}
-                height={40}
-                className="h-10 w-auto"
-                priority
-              />
+              <span className="text-2xl sm:text-3xl font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+                Stitch of Care
+              </span>
             </Link>
             <Navigation />
           </div>
