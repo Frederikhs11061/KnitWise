@@ -2,16 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
+
 :root {
   --color-cream: #faf9f7;
   --color-beige: #e8e2d8;
   --color-rose: #e8d4d1;
   --color-sage: #d4dccf;
   --color-charcoal: #2d2d2d;
+  
+  /* Lovable design system colors */
+  --primary-rose: 345 35% 48%; /* Dusty rose */
+  --secondary-sage: 150 18% 88%; /* Sage green */
+  --accent-amber: 32 65% 55%; /* Warm amber */
 }
 
 body {
   @apply bg-cream-50 text-charcoal-800 antialiased;
+  font-family: 'Lato', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
 }
 
 @keyframes fade-in {
