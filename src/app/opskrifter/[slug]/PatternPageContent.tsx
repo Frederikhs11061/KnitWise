@@ -159,6 +159,11 @@ function PatternReviews({ slug }: { slug: string }) {
     fetch("/api/user").then((r) => r.json()).then((data) => setUser(data?.user ?? null));
   }, [slug]);
 
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : 0;
+
   const submitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -184,7 +189,22 @@ function PatternReviews({ slug }: { slug: string }) {
 
   return (
     <div className="mt-10 pt-8 border-t border-beige-200">
-      <h2 className="text-xl font-semibold text-charcoal-900 mb-4">Anmeldelser</h2>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-xl font-semibold text-charcoal-900">Anmeldelser</h2>
+          {reviews.length > 0 && (
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-amber-600 text-sm">
+                {"★".repeat(Math.round(averageRating))}
+                {"☆".repeat(5 - Math.round(averageRating))}
+              </span>
+              <span className="text-sm text-charcoal-600">
+                {averageRating.toFixed(1)} ({reviews.length} {reviews.length === 1 ? "anmeldelse" : "anmeldelser"})
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
       {loading ? (
         <p className="text-charcoal-500 text-sm">Indlæser...</p>
       ) : (

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getFeaturedPatterns } from "@/lib/patterns";
+import HomeReviews from "@/components/HomeReviews";
 
 // Get featured patterns - limit to 3 for homepage
 const featuredPatterns = getFeaturedPatterns().slice(0, 3);
@@ -117,6 +118,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Reviews */}
+      <HomeReviews />
 
       {/* Blog teaser */}
       <section className="px-4 py-16">

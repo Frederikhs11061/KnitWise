@@ -3,15 +3,26 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   const slug = request.nextUrl.searchParams.get("slug");
-  if (!slug) {
-    return NextResponse.json({ error: "Mangler slug" }, { status: 400 });
-  }
+  const limit = request.nextUrl.searchParams.get("limit");
   const supabase = await createClient();
-  const { data, error } = await supabase
+  
+  let query = supabase
     .from("reviews")
     .select("id, pattern_slug, rating, comment, created_at")
-    .eq("pattern_slug", slug)
     .order("created_at", { ascending: false });
+  
+  if (slug) {
+    query = query.eq("pattern_slug", slug);
+  }
+  
+  if (limit) {
+    const limitNum = parseInt(limit, 10);
+    if (!isNaN(limitNum) && limitNum > 0) {
+      query = query.limit(limitNum);
+    }
+  }
+  
+  const { data, error } = await query;
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
