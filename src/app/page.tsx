@@ -30,11 +30,11 @@ const painPoints = [
 export default function HomePage() {
   return (
     <div className="min-h-screen">
-      {/* Hero - Lovable style */}
-      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+      {/* Hero - 1:1 Lovable match */}
+      <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background image */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-rose-200 via-rose-100 to-amber-100" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#e8d4c4] via-[#f0e6d8] to-[#e8d4c4]" />
           <Image
             src="/assets/hero-knitting.jpg"
             alt="Strikkeopskrifter"
@@ -42,46 +42,48 @@ export default function HomePage() {
             className="object-cover"
             priority
           />
-          {/* Overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(345_35%_48%_/_0.4)] via-[hsl(345_35%_48%_/_0.2)] to-[hsl(38_65%_55%_/_0.3)]" />
+          {/* Subtle overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent" />
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 max-w-5xl mx-auto px-4 py-20 text-center">
-          <p className="text-sm font-light uppercase tracking-[0.3em] text-white/90 mb-4">
-            Strik med glæde
-          </p>
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-4 leading-tight">
-            Din guide til
-            <br />
-            <span className="text-[hsl(345_35%_65%)] font-normal italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-              smukke masker
-            </span>
-          </h1>
-          <p className="text-lg sm:text-xl text-white/95 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-            Brug vores gratis strikkeberegner til at beregne garnmængde og maskeantal – og find
-            din næste yndlingsopskrift i vores shop.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/tools"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[hsl(345_35%_48%)] text-white text-base font-semibold hover:bg-[hsl(345_35%_42%)] transition-colors shadow-lg hover:shadow-xl"
-            >
-              Prøv beregneren gratis
-            </Link>
-            <Link
-              href="/opskrifter"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[hsl(38_30%_95%)] text-[hsl(25_30%_25%)] text-base font-semibold hover:bg-[hsl(38_30%_98%)] transition-colors border-2 border-[hsl(38_20%_85%)]"
-            >
-              Se alle opskrifter →
-            </Link>
+        {/* Content - left aligned like Lovable */}
+        <div className="relative z-10 max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-20">
+          <div className="max-w-2xl">
+            <p className="text-xs sm:text-sm font-light uppercase tracking-[0.3em] text-white/90 mb-6">
+              STRIK MED GLÆDE
+            </p>
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-[1.1]">
+              Din guide til
+              <br />
+              <span className="text-[#d4a5a5] font-normal italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+                smukke masker
+              </span>
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-white/95 mb-10 leading-relaxed font-light max-w-xl">
+              Brug vores gratis strikkeberegner til at beregne garnmængde og maskeantal – og find
+              din næste yndlingsopskrift i vores shop.
+            </p>
+            <div className="flex flex-col sm:flex-row items-start gap-4">
+              <Link
+                href="/tools"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[#a85a6b] text-white text-base font-semibold hover:bg-[#954a5a] transition-colors shadow-lg"
+              >
+                Prøv beregneren gratis
+              </Link>
+              <Link
+                href="/opskrifter"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[#f5ebe0] text-[#5a4a3a] text-base font-semibold hover:bg-[#faf5f0] transition-colors border border-[#d4c4b4]"
+              >
+                Se alle opskrifter →
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* Scroll hint */}
+        {/* Scroll hint - centered at bottom */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
           <p className="text-xs uppercase tracking-[0.2em] text-white/70 font-light">
-            Scroll ned
+            SCROLL NED
           </p>
         </div>
       </section>
